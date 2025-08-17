@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "mvp-news-trading/frontend/app.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "mvp-news-trading/frontend/app.py"
+    }
+  ],
+  "env": {
+    "FLASK_APP": "mvp-news-trading/frontend/app.py"
+  }
+}
