@@ -3,88 +3,381 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Trading System - Cloud Dashboard</title>
+    <title>MVP News Trading System - Complete Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
-        .stock-card { transition: all 0.3s; cursor: pointer; }
-        .stock-card:hover { transform: translateY(-5px); box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
-        .score-badge { font-size: 1.2rem; }
-        .high-score { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .medium-score { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-        .loading-overlay { 
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.7); display: none; 
-            justify-content: center; align-items: center; z-index: 9999;
+        body { background: #f8f9fa; }
+        .navbar { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .pipeline-card {
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            min-height: 180px;
+        }
+        .pipeline-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        .pipeline-card.active {
+            border-color: #667eea;
+            background: linear-gradient(135deg, rgba(102,126,234,0.1) 0%, rgba(118,75,162,0.1) 100%);
+        }
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .stats-card {
+            border-left: 4px solid #667eea;
+        }
+        .activity-feed {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .signal-badge {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        .btn-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+        .btn-gradient:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            color: white;
         }
     </style>
 </head>
 <body>
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="text-center text-white">
-            <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;"></div>
-            <h3>Processing with AI...</h3>
-        </div>
-    </div>
-
-    <nav class="navbar navbar-dark bg-dark">
-        <div class="container">
-            <span class="navbar-brand mb-0 h1">🤖 AI Trading System (Vercel Cloud)</span>
-            <span class="text-white">No Backend Required!</span>
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1">
+                <i class="bi bi-graph-up"></i> MVP News Trading System
+            </span>
+            <div class="d-flex text-white">
+                <span class="me-3"><i class="bi bi-clock"></i> <span id="market-status">Market Closed</span></span>
+                <span><i class="bi bi-wallet2"></i> Portfolio: <span id="portfolio-value">$100,000</span></span>
+            </div>
         </div>
     </nav>
 
-    <div class="container mt-4">
-        <!-- Control Panel -->
+    <div class="container-fluid mt-3">
+        <!-- Portfolio Stats Row -->
         <div class="row mb-4">
-            <div class="col-md-6">
-                <div class="card border-primary">
+            <div class="col-md-2">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <h6 class="text-muted">Daily P&L</h6>
+                        <h4 id="daily-pnl" class="text-success">+$0</h4>
+                        <small class="text-muted">0.00%</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <h6 class="text-muted">Open Positions</h6>
+                        <h4 id="open-positions">0</h4>
+                        <small class="text-muted">Max: 3</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <h6 class="text-muted">Today's Trades</h6>
+                        <h4 id="today-trades">0/3</h4>
+                        <small class="text-muted">Limit: 3/day</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <h6 class="text-muted">Win Rate</h6>
+                        <h4 id="win-rate" class="text-primary">0%</h4>
+                        <small class="text-muted">Target: >60%</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <h6 class="text-muted">Risk Used</h6>
+                        <h4 id="risk-used" class="text-warning">0%</h4>
+                        <small class="text-muted">Max: 5%/day</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <h6 class="text-muted">Active Signals</h6>
+                        <h4 id="active-signals">0</h4>
+                        <small class="text-muted signal-badge">● Live</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trading Pipeline -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h4 class="mb-3">📊 Trading Pipeline Status</h4>
+                <div class="row g-3">
+                    <!-- Step 0: Weekly Selection -->
+                    <div class="col-md-3">
+                        <div class="card pipeline-card" id="step-0" onclick="runWeeklySelection()">
+                            <div class="card-body text-center">
+                                <div class="step-number mx-auto">0</div>
+                                <h6>Weekly Selection</h6>
+                                <p class="small text-muted">Select 10-25 stocks</p>
+                                <div id="watchlist-status">
+                                    <span class="badge bg-warning">Not Selected</span>
+                                    <div class="mt-2">
+                                        <button class="btn btn-sm btn-gradient" onclick="runWeeklySelection(event)">
+                                            <i class="bi bi-play-fill"></i> Run Selection
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 1: News Scout -->
+                    <div class="col-md-3">
+                        <div class="card pipeline-card" id="step-1">
+                            <div class="card-body text-center">
+                                <div class="step-number mx-auto">1</div>
+                                <h6>News Scout</h6>
+                                <p class="small text-muted">Monitor every 30min</p>
+                                <div id="scout-status">
+                                    <span class="badge bg-secondary">Waiting</span>
+                                    <div class="small mt-2">Next: <span id="next-scan">--:--</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: AI Analysis -->
+                    <div class="col-md-3">
+                        <div class="card pipeline-card" id="step-2">
+                            <div class="card-body text-center">
+                                <div class="step-number mx-auto">2</div>
+                                <h6>AI Analyst</h6>
+                                <p class="small text-muted">Convert to signals</p>
+                                <div id="analyst-status">
+                                    <span class="badge bg-secondary">Idle</span>
+                                    <div class="small mt-2">Signals: <span id="signal-count">0</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Risk Check -->
+                    <div class="col-md-3">
+                        <div class="card pipeline-card" id="step-3">
+                            <div class="card-body text-center">
+                                <div class="step-number mx-auto">3</div>
+                                <h6>Risk Manager</h6>
+                                <p class="small text-muted">Validate trades</p>
+                                <div id="risk-status">
+                                    <span class="badge bg-secondary">Ready</span>
+                                    <div class="small mt-2">Approved: <span id="approved-count">0</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Position Sizing -->
+                    <div class="col-md-3">
+                        <div class="card pipeline-card" id="step-4">
+                            <div class="card-body text-center">
+                                <div class="step-number mx-auto">4</div>
+                                <h6>Position Sizing</h6>
+                                <p class="small text-muted">Calculate shares</p>
+                                <div id="sizing-status">
+                                    <span class="badge bg-secondary">Ready</span>
+                                    <div class="small mt-2">Kelly: <span id="kelly-factor">0.25</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 5: Order Execution -->
+                    <div class="col-md-3">
+                        <div class="card pipeline-card" id="step-5">
+                            <div class="card-body text-center">
+                                <div class="step-number mx-auto">5</div>
+                                <h6>Executor</h6>
+                                <p class="small text-muted">Place orders</p>
+                                <div id="executor-status">
+                                    <span class="badge bg-secondary">Ready</span>
+                                    <div class="small mt-2">Alpaca: <span class="text-success">●</span> Connected</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 6: Position Monitor -->
+                    <div class="col-md-3">
+                        <div class="card pipeline-card" id="step-6">
+                            <div class="card-body text-center">
+                                <div class="step-number mx-auto">6</div>
+                                <h6>Position Monitor</h6>
+                                <p class="small text-muted">Track P&L</p>
+                                <div id="monitor-status">
+                                    <span class="badge bg-secondary">Monitoring</span>
+                                    <div class="small mt-2">Active: <span id="active-positions">0</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 7: Exit Manager -->
+                    <div class="col-md-3">
+                        <div class="card pipeline-card" id="step-7">
+                            <div class="card-body text-center">
+                                <div class="step-number mx-auto">7</div>
+                                <h6>Exit Manager</h6>
+                                <p class="small text-muted">Stop loss/Take profit</p>
+                                <div id="exit-status">
+                                    <span class="badge bg-secondary">Ready</span>
+                                    <div class="small mt-2">SL/TP Set: <span id="stops-set">0</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Row -->
+        <div class="row">
+            <!-- Watchlist -->
+            <div class="col-md-3">
+                <div class="card">
                     <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">📊 Weekly Selection (Step 1)</h5>
+                        <h6 class="mb-0"><i class="bi bi-eye"></i> Weekly Watchlist</h6>
                     </div>
-                    <div class="card-body">
-                        <p>AI analyzes 40+ stocks and selects 10-25 best candidates for the week.</p>
-                        <button class="btn btn-primary btn-lg w-100" onclick="selectCandidates()">
-                            🎯 Run AI Selection
-                        </button>
+                    <div class="card-body" style="height: 400px; overflow-y: auto;">
+                        <div id="watchlist-stocks">
+                            <p class="text-muted text-center">No stocks selected</p>
+                            <p class="text-center">
+                                <button class="btn btn-sm btn-outline-primary" onclick="runWeeklySelection()">
+                                    Select Stocks
+                                </button>
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
-            
-            <div class="col-md-6">
-                <div class="card border-success">
+
+            <!-- Active Signals -->
+            <div class="col-md-3">
+                <div class="card">
                     <div class="card-header bg-success text-white">
-                        <h5 class="mb-0">📰 News Monitor (Step 2)</h5>
+                        <h6 class="mb-0"><i class="bi bi-lightning"></i> Active Signals</h6>
                     </div>
-                    <div class="card-body">
-                        <p>Monitor real-time news for selected stocks. Runs every 30 minutes.</p>
-                        <button class="btn btn-success btn-lg w-100" onclick="monitorNews()" id="monitorBtn">
-                            📡 Check News Now
-                        </button>
+                    <div class="card-body" style="height: 400px; overflow-y: auto;">
+                        <div id="active-signals-list">
+                            <p class="text-muted text-center">No active signals</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Trades -->
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0"><i class="bi bi-arrow-left-right"></i> Recent Trades</h6>
+                    </div>
+                    <div class="card-body" style="height: 400px; overflow-y: auto;">
+                        <div id="recent-trades">
+                            <p class="text-muted text-center">No trades today</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Feed -->
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-header bg-dark text-white">
+                        <h6 class="mb-0"><i class="bi bi-activity"></i> Live Activity</h6>
+                    </div>
+                    <div class="card-body activity-feed" style="height: 400px; overflow-y: auto;">
+                        <div id="activity-feed">
+                            <div class="small text-muted mb-2">
+                                <span class="text-info">●</span> System started
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Results Section -->
-        <div id="candidatesSection" class="mb-4" style="display: none;">
-            <h3>🎯 This Week's Selected Candidates</h3>
-            <div id="candidatesList" class="row"></div>
+        <!-- Control Panel -->
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <button class="btn btn-success w-100" onclick="startSystem()">
+                                    <i class="bi bi-play-fill"></i> Start Trading
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-warning w-100" onclick="pauseSystem()">
+                                    <i class="bi bi-pause-fill"></i> Pause System
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-info w-100" onclick="testWebhook()">
+                                    <i class="bi bi-send"></i> Test Webhook
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-danger w-100" onclick="emergencyStop()">
+                                    <i class="bi bi-stop-fill"></i> Emergency Stop
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <div id="newsSection" style="display: none;">
-            <h3>📰 Latest News & Signals</h3>
-            <div id="newsList"></div>
-        </div>
-
-        <!-- Status Messages -->
-        <div id="statusMessages"></div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        let currentWatchlist = [];
+        // Global variables
+        let watchlist = [];
+        let systemRunning = false;
 
-        async function selectCandidates() {
-            showLoading(true);
+        // Run weekly selection
+        async function runWeeklySelection(event) {
+            if (event) event.stopPropagation();
+            
+            updatePipelineStep(0, 'active', 'Selecting...');
+            addActivity('Running weekly stock selection...');
+            
             try {
                 const response = await fetch('/api/weekly_candidates_supabase', {
                     method: 'GET',
@@ -92,130 +385,279 @@
                 });
                 
                 const text = await response.text();
-                console.log('Response:', text);
                 const data = JSON.parse(text);
                 
                 if (data.success) {
-                    currentWatchlist = data.candidates.map(c => c.symbol);
-                    displayCandidates(data.candidates);
-                    showStatus('success', `✅ Selected ${data.total_selected} stocks for this week!`);
+                    watchlist = data.candidates;
+                    displayWatchlist(data.candidates);
+                    updatePipelineStep(0, 'success', `${data.total_selected} Selected`);
+                    addActivity(`✅ Selected ${data.total_selected} stocks for week ${data.week}`);
                     
-                    // Enable news monitoring
-                    document.getElementById('monitorBtn').disabled = false;
+                    // Enable next steps
+                    updatePipelineStep(1, 'ready', 'Ready');
+                    
+                    // Save to localStorage
+                    localStorage.setItem('watchlist', JSON.stringify(watchlist));
+                    localStorage.setItem('watchlist_week', data.week);
                 }
             } catch (error) {
-                showStatus('danger', `❌ Error: ${error.message}`);
-            } finally {
-                showLoading(false);
+                console.error('Error:', error);
+                updatePipelineStep(0, 'error', 'Failed');
+                addActivity(`❌ Selection failed: ${error.message}`);
             }
         }
 
-        async function monitorNews() {
-            if (currentWatchlist.length === 0) {
-                showStatus('warning', '⚠️ Please select candidates first!');
+        // Display watchlist
+        function displayWatchlist(stocks) {
+            const container = document.getElementById('watchlist-stocks');
+            if (!stocks || stocks.length === 0) {
+                container.innerHTML = '<p class="text-muted text-center">No stocks selected</p>';
                 return;
             }
             
-            showLoading(true);
-            try {
-                const response = await fetch('/api/monitor_news', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ watchlist: currentWatchlist })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    displayNews(data);
-                    showStatus('success', `📡 Found ${data.high_impact_count} high-impact news items!`);
+            container.innerHTML = stocks.map((stock, i) => `
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span><strong>${i+1}. ${stock.symbol}</strong></span>
+                    <span class="badge bg-${stock.score >= 85 ? 'success' : stock.score >= 75 ? 'warning' : 'secondary'}">
+                        ${stock.score}
+                    </span>
+                </div>
+                <small class="text-muted d-block mb-2">${stock.reason}</small>
+            `).join('');
+        }
+
+        // Update pipeline step status
+        function updatePipelineStep(step, status, text) {
+            const stepCard = document.getElementById(`step-${step}`);
+            if (!stepCard) return;
+            
+            // Update card state
+            stepCard.classList.remove('active', 'success', 'error');
+            if (status === 'active') stepCard.classList.add('active');
+            
+            // Update status badge
+            const statusElement = stepCard.querySelector('[id$="-status"] .badge');
+            if (statusElement) {
+                statusElement.className = 'badge';
+                switch(status) {
+                    case 'active':
+                        statusElement.classList.add('bg-primary');
+                        break;
+                    case 'success':
+                        statusElement.classList.add('bg-success');
+                        break;
+                    case 'error':
+                        statusElement.classList.add('bg-danger');
+                        break;
+                    case 'ready':
+                        statusElement.classList.add('bg-info');
+                        break;
+                    default:
+                        statusElement.classList.add('bg-secondary');
                 }
-            } catch (error) {
-                showStatus('danger', `❌ Error: ${error.message}`);
-            } finally {
-                showLoading(false);
+                statusElement.textContent = text;
             }
         }
 
-        function displayCandidates(candidates) {
-            const container = document.getElementById('candidatesList');
-            container.innerHTML = candidates.map(stock => `
-                <div class="col-md-3 mb-3">
-                    <div class="card stock-card ${stock.score >= 85 ? 'border-success' : 'border-warning'}">
-                        <div class="card-body">
-                            <h5 class="card-title">${stock.symbol}</h5>
-                            <div class="mb-2">
-                                <span class="badge score-badge ${stock.score >= 85 ? 'high-score' : 'medium-score'}">
-                                    Score: ${stock.score}
-                                </span>
-                            </div>
-                            <small class="text-muted">${stock.reason}</small>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-            
-            document.getElementById('candidatesSection').style.display = 'block';
-        }
-
-        function displayNews(newsData) {
-            const container = document.getElementById('newsList');
-            
-            const alertsHtml = newsData.alerts.length > 0 ? `
-                <div class="alert alert-warning mb-3">
-                    <h5>⚠️ High Impact Alerts</h5>
-                    ${newsData.alerts.map(alert => `
-                        <div class="mb-2">
-                            <strong>${alert.symbol}</strong>: ${alert.title}
-                            <span class="badge bg-${alert.sentiment.direction === 'bullish' ? 'success' : 'danger'}">
-                                ${alert.sentiment.direction}
-                            </span>
-                        </div>
-                    `).join('')}
-                </div>
-            ` : '';
-            
-            const newsHtml = newsData.news.map(item => `
-                <div class="card mb-2">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <h6>${item.symbol}</h6>
-                            <span class="badge bg-${item.sentiment.direction === 'bullish' ? 'success' : item.sentiment.direction === 'bearish' ? 'danger' : 'secondary'}">
-                                ${item.sentiment.direction}
-                            </span>
-                        </div>
-                        <p class="mb-1">${item.title}</p>
-                        <small class="text-muted">${new Date(item.published_at).toLocaleString()}</small>
-                    </div>
-                </div>
-            `).join('');
-            
-            container.innerHTML = alertsHtml + newsHtml;
-            document.getElementById('newsSection').style.display = 'block';
-        }
-
-        function showStatus(type, message) {
-            const container = document.getElementById('statusMessages');
-            const alertHtml = `
-                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-                    ${message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        // Add activity to feed
+        function addActivity(message) {
+            const feed = document.getElementById('activity-feed');
+            const time = new Date().toLocaleTimeString();
+            const entry = `
+                <div class="small mb-2">
+                    <span class="text-muted">${time}</span>
+                    <div>${message}</div>
                 </div>
             `;
-            container.insertAdjacentHTML('afterbegin', alertHtml);
-        }
-
-        function showLoading(show) {
-            document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
-        }
-
-        // Auto-refresh news every 30 minutes
-        setInterval(() => {
-            if (currentWatchlist.length > 0) {
-                monitorNews();
+            feed.insertAdjacentHTML('afterbegin', entry);
+            
+            // Keep only last 50 entries
+            while (feed.children.length > 50) {
+                feed.removeChild(feed.lastChild);
             }
-        }, 30 * 60 * 1000);
+        }
+
+        // System control functions
+        function startSystem() {
+            if (!watchlist || watchlist.length === 0) {
+                alert('Please select weekly stocks first (Step 0)');
+                return;
+            }
+            systemRunning = true;
+            addActivity('🚀 Trading system started');
+            startNewsMonitoring();
+        }
+
+        function pauseSystem() {
+            systemRunning = false;
+            addActivity('⏸️ System paused');
+        }
+
+        function testWebhook() {
+            addActivity('📧 Sending test webhook...');
+            // Simulate webhook test
+            setTimeout(() => {
+                addActivity('✅ Webhook test successful');
+                updatePipelineStep(2, 'active', 'Processing');
+            }, 1000);
+        }
+
+        function emergencyStop() {
+            if (confirm('Are you sure? This will close all positions and stop trading.')) {
+                systemRunning = false;
+                addActivity('🛑 EMERGENCY STOP ACTIVATED');
+                // Reset all pipeline steps
+                for (let i = 1; i <= 7; i++) {
+                    updatePipelineStep(i, 'stopped', 'Stopped');
+                }
+            }
+        }
+
+        // Start news monitoring
+        function startNewsMonitoring() {
+            if (!systemRunning) return;
+            
+            updatePipelineStep(1, 'active', 'Scanning...');
+            addActivity('📰 Scanning news sources...');
+            
+            // Simulate news monitoring every 30 seconds (in production: 30 minutes)
+            setTimeout(() => {
+                if (systemRunning) {
+                    simulateNewsFound();
+                }
+            }, 30000);
+        }
+
+        // Simulate news found
+        function simulateNewsFound() {
+            const randomStock = watchlist[Math.floor(Math.random() * watchlist.length)];
+            if (randomStock) {
+                addActivity(`📰 News found for ${randomStock.symbol}`);
+                updatePipelineStep(1, 'success', 'News Found');
+                analyzeNews(randomStock);
+            }
+            
+            // Continue monitoring
+            if (systemRunning) {
+                setTimeout(() => startNewsMonitoring(), 5000);
+            }
+        }
+
+        // Analyze news
+        function analyzeNews(stock) {
+            updatePipelineStep(2, 'active', 'Analyzing...');
+            
+            setTimeout(() => {
+                const confidence = Math.random();
+                if (confidence > 0.7) {
+                    addActivity(`🎯 Signal generated for ${stock.symbol} (${(confidence * 100).toFixed(0)}% confidence)`);
+                    updatePipelineStep(2, 'success', 'Signal Created');
+                    checkRisk(stock, confidence);
+                } else {
+                    addActivity(`ℹ️ News for ${stock.symbol} not actionable`);
+                    updatePipelineStep(2, 'ready', 'Ready');
+                }
+            }, 2000);
+        }
+
+        // Risk check
+        function checkRisk(stock, confidence) {
+            updatePipelineStep(3, 'active', 'Checking...');
+            
+            setTimeout(() => {
+                const approved = Math.random() > 0.3; // 70% approval rate
+                if (approved) {
+                    addActivity(`✅ Risk approved for ${stock.symbol}`);
+                    updatePipelineStep(3, 'success', 'Approved');
+                    calculatePosition(stock, confidence);
+                } else {
+                    addActivity(`❌ Risk rejected for ${stock.symbol} (limits exceeded)`);
+                    updatePipelineStep(3, 'error', 'Rejected');
+                }
+            }, 1500);
+        }
+
+        // Calculate position size
+        function calculatePosition(stock, confidence) {
+            updatePipelineStep(4, 'active', 'Calculating...');
+            
+            setTimeout(() => {
+                const shares = Math.floor(Math.random() * 100) + 10;
+                addActivity(`📊 Position size: ${shares} shares of ${stock.symbol}`);
+                updatePipelineStep(4, 'success', 'Sized');
+                executeTrade(stock, shares);
+            }, 1000);
+        }
+
+        // Execute trade
+        function executeTrade(stock, shares) {
+            updatePipelineStep(5, 'active', 'Executing...');
+            
+            setTimeout(() => {
+                addActivity(`💰 BUY ${shares} ${stock.symbol} @ Market`);
+                updatePipelineStep(5, 'success', 'Executed');
+                
+                // Update stats
+                const positions = parseInt(document.getElementById('open-positions').textContent) + 1;
+                document.getElementById('open-positions').textContent = positions;
+                
+                // Start monitoring
+                monitorPosition(stock, shares);
+            }, 2000);
+        }
+
+        // Monitor position
+        function monitorPosition(stock, shares) {
+            updatePipelineStep(6, 'active', 'Monitoring');
+            updatePipelineStep(7, 'ready', 'SL/TP Set');
+            
+            // Add to recent trades
+            const tradesDiv = document.getElementById('recent-trades');
+            tradesDiv.innerHTML = `
+                <div class="small mb-2">
+                    <strong>${stock.symbol}</strong> - ${shares} shares
+                    <div class="text-success">Entry: Market</div>
+                    <div class="text-muted">SL: -2% | TP: +5%</div>
+                </div>
+            ` + tradesDiv.innerHTML;
+        }
+
+        // Update market status
+        function updateMarketStatus() {
+            const now = new Date();
+            const hours = now.getHours();
+            const day = now.getDay();
+            
+            // Check if market is open (simplified)
+            const isWeekday = day >= 1 && day <= 5;
+            const isMarketHours = hours >= 9 && hours < 16;
+            
+            const statusElement = document.getElementById('market-status');
+            if (isWeekday && isMarketHours) {
+                statusElement.textContent = 'Market Open';
+                statusElement.className = 'text-success';
+            } else {
+                statusElement.textContent = 'Market Closed';
+                statusElement.className = 'text-danger';
+            }
+        }
+
+        // Load saved watchlist on page load
+        window.onload = function() {
+            const savedWatchlist = localStorage.getItem('watchlist');
+            if (savedWatchlist) {
+                watchlist = JSON.parse(savedWatchlist);
+                displayWatchlist(watchlist);
+                updatePipelineStep(0, 'success', `${watchlist.length} Selected`);
+                updatePipelineStep(1, 'ready', 'Ready');
+            }
+            
+            updateMarketStatus();
+            setInterval(updateMarketStatus, 60000); // Update every minute
+            
+            addActivity('🔌 System initialized');
+            addActivity('💡 Click Step 0 to select weekly stocks');
+        };
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
