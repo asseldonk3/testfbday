@@ -26,6 +26,7 @@ from agents.executor import ExecutorAgent
 
 # Import API routers
 from api.watchlist import router as watchlist_router
+from routers.news import router as news_router
 
 # Initialize agents
 scout_agent = ScoutAgent()
@@ -95,6 +96,7 @@ from api import webhook
 # Include routers
 app.include_router(webhook.router)
 app.include_router(watchlist_router)
+app.include_router(news_router)
 
 # Scheduled tasks
 async def scout_news():

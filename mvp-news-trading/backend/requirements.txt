@@ -10,6 +10,7 @@ alembic==1.13.1
 
 # AI/LLM Services
 google-generativeai==0.8.3
+google-genai==0.3.0  # New Google AI SDK with grounding support
 openai==1.6.0
 
 # Trading & Market Data

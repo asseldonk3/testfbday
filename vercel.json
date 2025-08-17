@@ -1,18 +1,14 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "mvp-news-trading/frontend/app.py",
-      "use": "@vercel/python"
+  "functions": {
+    "api/weekly_candidates.py": {
+      "maxDuration": 10
     }
-  ],
-  "routes": [
+  },
+  "rewrites": [
     {
-      "src": "/(.*)",
-      "dest": "mvp-news-trading/frontend/app.py"
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
     }
-  ],
-  "env": {
-    "FLASK_APP": "mvp-news-trading/frontend/app.py"
-  }
+  ]
 }

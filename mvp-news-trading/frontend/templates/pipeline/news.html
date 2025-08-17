@@ -18,16 +18,24 @@
         <div class="col-md-6">
             <div class="card mb-4">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Configuration</h5>
+                    <h5 class="mb-0">News Sources Configuration</h5>
                 </div>
                 <div class="card-body">
-                    <table class="table table-sm">
-                        <tr><td><strong>AI Model:</strong></td><td>Gemini Pro 2.5</td></tr>
-                        <tr><td><strong>Data Source:</strong></td><td>Google Search + News API</td></tr>
+                    <h6>Active Sources:</h6>
+                    <ul class="list-unstyled">
+                        <li id="source-gemini"><i class="bi bi-check-circle text-success"></i> <strong>Gemini 2.0 Flash</strong> - Google Search grounding (real-time)</li>
+                        <li id="source-marketaux"><i class="bi bi-check-circle text-success"></i> <strong>Marketaux</strong> - EU financial news API</li>
+                    </ul>
+                    <div class="alert alert-info mt-3">
+                        <i class="bi bi-info-circle"></i> <strong>Real-time News:</strong> 
+                        Gemini uses Google Search grounding to fetch the latest news in real-time.
+                    </div>
+                    <table class="table table-sm mt-3">
                         <tr><td><strong>Scan Frequency:</strong></td><td>Every 30 minutes</td></tr>
                         <tr><td><strong>Market Hours:</strong></td><td>9:00 - 17:30 CET</td></tr>
                         <tr><td><strong>Focus:</strong></td><td>Material news, earnings, M&A</td></tr>
                         <tr><td><strong>Latency Target:</strong></td><td>&lt; 30 seconds</td></tr>
+                        <tr><td><strong>Freshness Threshold:</strong></td><td>&lt; 4 hours</td></tr>
                     </table>
                 </div>
             </div>
@@ -198,10 +206,22 @@ Only report material events that could move the stock price.</code></pre>
         return diffHours <= 4; // News is fresh if less than 4 hours old
     }
     
-    // Load real news (when API is ready)
-    function loadLatestNews() {
-        // This will be connected to the actual API
-        const mockNews = [
+    // Load real news from aggregated API
+    async function loadLatestNews() {
+        try {
+            const response = await fetch('/api/news/fresh');
+            const data = await response.json();
+            
+            const container = document.getElementById('live-news-items');
+            container.innerHTML = '';
+            
+            if (data.fresh_articles && data.fresh_articles.length > 0) {
+                data.fresh_articles.forEach(article => {
+                    displayNewsArticle(article);
+                });
+            } else {
+                // Fall back to mock data if no API response
+                const mockNews = [
             {
                 ticker: "ASML.AS",
                 headline: "ASML shares rise on semiconductor demand outlook",
@@ -223,38 +243,49 @@ Only report material events that could move the stock price.</code></pre>
         const container = document.getElementById('live-news-items');
         container.innerHTML = '';
         
-        mockNews.forEach(news => {
-            const isFresh = isNewsFresh(news.timestamp);
-            const age = getNewsAge(news.timestamp);
-            
-            const newsHtml = `
-                <div class="news-item mb-3 p-3 border rounded ${isFresh ? '' : 'opacity-50'}">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <h6 class="mb-1">${news.ticker}</h6>
-                            <p class="mb-1"><strong>${news.headline}</strong></p>
-                        </div>
-                        <div class="text-end">
-                            <span class="badge bg-${news.sentiment === 'positive' ? 'success' : news.sentiment === 'negative' ? 'danger' : 'secondary'}">
-                                ${news.sentiment.toUpperCase()}
-                            </span>
-                            ${isFresh ? '<span class="badge bg-info ms-1">FRESH</span>' : '<span class="badge bg-warning ms-1">OLD</span>'}
-                        </div>
+                mockNews.forEach(news => {
+                    displayNewsArticle(news);
+                });
+            }
+        } catch (error) {
+            console.error('Error loading news:', error);
+        }
+    }
+    
+    // Display a single news article
+    function displayNewsArticle(article) {
+        const container = document.getElementById('live-news-items');
+        const isFresh = article.is_fresh !== undefined ? article.is_fresh : isNewsFresh(article.timestamp);
+        const age = article.age_hours ? `${article.age_hours.toFixed(1)} hours ago` : getNewsAge(article.timestamp);
+        const sentiment = article.sentiment || 'neutral';
+        const source = article.api_source ? `${article.source || 'Unknown'} (via ${article.api_source})` : (article.source || 'Unknown');
+        
+        const newsHtml = `
+            <div class="news-item mb-3 p-3 border rounded ${isFresh ? '' : 'opacity-50'}">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="mb-1">${article.ticker}</h6>
+                        <p class="mb-1"><strong>${article.headline}</strong></p>
                     </div>
-                    <div class="d-flex justify-content-between">
-                        <small class="text-muted">${news.source}</small>
-                        <small class="text-${isFresh ? 'success' : 'danger'} fw-bold">
-                            <i class="bi bi-clock"></i> ${age}
-                        </small>
-                    </div>
-                    <small class="text-muted">Exact time: ${new Date(news.timestamp).toLocaleString()}</small>
-                    <div class="mt-2">
-                        <small>Materiality: ${news.materiality}/10</small>
+                    <div class="text-end">
+                        <span class="badge bg-${sentiment === 'positive' ? 'success' : sentiment === 'negative' ? 'danger' : 'secondary'}">
+                            ${sentiment.toUpperCase()}
+                        </span>
+                        ${isFresh ? '<span class="badge bg-info ms-1">FRESH</span>' : '<span class="badge bg-warning ms-1">OLD</span>'}
+                        ${article.api_source ? `<span class="badge bg-dark ms-1">${article.api_source.toUpperCase()}</span>` : ''}
                     </div>
                 </div>
-            `;
-            container.innerHTML += newsHtml;
-        });
+                <div class="d-flex justify-content-between">
+                    <small class="text-muted">${source}</small>
+                    <small class="text-${isFresh ? 'success' : 'danger'} fw-bold">
+                        <i class="bi bi-clock"></i> ${age}
+                    </small>
+                </div>
+                ${article.published_at ? `<small class="text-muted">Published: ${new Date(article.published_at).toLocaleString()}</small>` : ''}
+                ${article.materiality ? `<div class="mt-2"><small>Materiality: ${article.materiality}/10</small></div>` : ''}
+            </div>
+        `;
+        container.innerHTML += newsHtml;
     }
     
     // Initialize

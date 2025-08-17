@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading System - Weekly Candidates</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">📈 Trading System Control Panel</h1>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3>Weekly Candidates Selection</h3>
+            </div>
+            <div class="card-body">
+                <p>Click the button below to select 10-25 stocks for weekly monitoring.</p>
+                <button id="selectBtn" class="btn btn-primary btn-lg">
+                    🎯 Select Weekly Candidates
+                </button>
+                <div id="loading" class="spinner-border text-primary mt-3 d-none" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="results" class="mt-4"></div>
+    </div>
+
+    <script>
+        document.getElementById('selectBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('selectBtn');
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            
+            // Show loading
+            btn.disabled = true;
+            loading.classList.remove('d-none');
+            results.innerHTML = '';
+            
+            try {
+                // In production, get this from environment variable
+                const response = await fetch('/api/weekly_candidates', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer your-secret-key'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    results.innerHTML = `
+                        <div class="alert alert-success">
+                            <h4>✅ ${data.message}</h4>
+                            <p>Week: ${data.watchlist.week}</p>
+                            <p>Selected Stocks (${data.watchlist.count}):</p>
+                            <div class="row">
+                                ${data.watchlist.stocks.map(stock => 
+                                    `<div class="col-md-2 col-sm-3 col-4 mb-2">
+                                        <span class="badge bg-primary fs-6">${stock}</span>
+                                    </div>`
+                                ).join('')}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(data.error || 'Failed to select candidates');
+                }
+            } catch (error) {
+                results.innerHTML = `
+                    <div class="alert alert-danger">
+                        <h4>❌ Error</h4>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            } finally {
+                btn.disabled = false;
+                loading.classList.add('d-none');
+            }
+        });
+    </script>
+</body>
+</html>

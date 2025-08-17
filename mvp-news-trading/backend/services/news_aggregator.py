@@ -9,9 +9,8 @@ from datetime import datetime, timedelta
 from loguru import logger
 from collections import defaultdict
 
-from services.gemini_service import GeminiService
+from services.gemini_service_v2 import GeminiServiceV2
 from services.marketaux_service import MarketauxService
-from services.finnhub_service import FinnhubService
 
 
 class NewsAggregator:
@@ -19,9 +18,9 @@ class NewsAggregator:
     
     def __init__(self):
         """Initialize all news services"""
-        self.gemini_service = GeminiService()
+        # Use the new Gemini V2 with Google Search grounding
+        self.gemini_service = GeminiServiceV2()
         self.marketaux_service = MarketauxService()
-        self.finnhub_service = FinnhubService()
         
         # Track which services are available
         self.available_services = self._check_available_services()
@@ -36,8 +35,6 @@ class NewsAggregator:
             available.append("gemini")
         if settings.marketaux_api_key:
             available.append("marketaux")
-        if settings.finnhub_api_key:
-            available.append("finnhub")
         
         return available
     
@@ -60,8 +57,6 @@ class NewsAggregator:
                 tasks.append(self._get_gemini_news(ticker))
             if "marketaux" in self.available_services:
                 tasks.append(self.marketaux_service.get_news_for_ticker(ticker, hours_back))
-            if "finnhub" in self.available_services:
-                tasks.append(self.finnhub_service.get_company_news(ticker))
             
             # Wait for all results
             results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -141,7 +136,7 @@ class NewsAggregator:
             }
             
             company_name = company_names.get(ticker, ticker.split('.')[0])
-            result = await self.gemini_service.search_news(ticker, company_name)
+            result = await self.gemini_service.search_real_time_news(ticker, company_name)
             
             # Add api_source to each article
             if "articles" in result:

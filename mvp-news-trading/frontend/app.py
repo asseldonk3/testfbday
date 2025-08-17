@@ -230,6 +230,20 @@ def get_watchlist_suggestions():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# News API proxy routes
+@app.route('/api/news/<path:path>')
+def proxy_news_api(path):
+    """Proxy news API calls to backend"""
+    try:
+        url = f"{BACKEND_URL}/api/news/{path}"
+        response = requests.get(url, params=request.args, timeout=10)
+        if response.status_code == 200:
+            return jsonify(response.json())
+        else:
+            return jsonify({'error': 'Failed to fetch news'}), response.status_code
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 # WebSocket Events
 @socketio.on('connect')
 def handle_connect():
