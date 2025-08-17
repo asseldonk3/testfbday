@@ -1,0 +1,351 @@
+{% extends "base.html" %}
+
+{% block title %}Watchlist Manager - MVP News Trading{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Current Watchlist -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-eye"></i> Current Weekly Watchlist
+                    <span class="badge bg-light text-dark float-end" id="watchlist-count">0</span>
+                </h5>
+            </div>
+            <div class="card-body" style="height: 600px; overflow-y: auto;">
+                <div class="mb-3">
+                    <small class="text-muted">Last updated: <span id="last-updated">-</span></small>
+                    <br>
+                    <small class="text-muted">Reason: <span id="update-reason">Manual selection</span></small>
+                </div>
+                <div id="current-watchlist" class="list-group">
+                    <!-- Current stocks will be loaded here -->
+                </div>
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-danger w-100" onclick="clearWatchlist()">
+                    <i class="bi bi-trash"></i> Clear All
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stock Universe -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-globe"></i> EU Stock Universe
+                    <span class="badge bg-light text-dark float-end" id="universe-count">0</span>
+                </h5>
+            </div>
+            <div class="card-body" style="height: 500px; overflow-y: auto;">
+                <!-- Filter by Exchange -->
+                <div class="mb-3">
+                    <select class="form-select" id="exchange-filter" onchange="filterStocks()">
+                        <option value="">All Exchanges</option>
+                        <option value="Amsterdam">Amsterdam (AEX)</option>
+                        <option value="Frankfurt">Frankfurt (DAX)</option>
+                        <option value="Paris">Paris (CAC40)</option>
+                        <option value="Swiss">Swiss (SMI)</option>
+                        <option value="Milan">Milan (FTSE MIB)</option>
+                        <option value="Madrid">Madrid (IBEX 35)</option>
+                    </select>
+                </div>
+                
+                <div id="stock-universe" class="list-group">
+                    <!-- Universe stocks will be loaded here -->
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="update-reason" 
+                           placeholder="Reason for update (e.g., Earnings week focus)">
+                    <button class="btn btn-primary" onclick="saveWatchlist()">
+                        <i class="bi bi-save"></i> Save Watchlist
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- AI Suggestions -->
+<div class="row mt-3">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-lightbulb"></i> AI Suggestions for This Week
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row" id="suggestions-container">
+                    <div class="col-md-4">
+                        <h6>📈 Earnings Reports</h6>
+                        <div id="earnings-suggestions" class="list-group list-group-flush">
+                            <!-- Earnings stocks -->
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <h6>📊 High Volume</h6>
+                        <div id="volume-suggestions" class="list-group list-group-flush">
+                            <!-- High volume stocks -->
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <h6>🎢 High Volatility</h6>
+                        <div id="volatility-suggestions" class="list-group list-group-flush">
+                            <!-- Volatile stocks -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stock-item {
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .stock-item:hover {
+        background-color: #f8f9fa;
+        transform: translateX(5px);
+    }
+    
+    .stock-item.selected {
+        background-color: #d4edda;
+        border-color: #28a745;
+    }
+    
+    .stock-item .badge {
+        font-size: 0.7rem;
+    }
+    
+    .suggestion-item {
+        cursor: pointer;
+        padding: 5px;
+        margin: 2px 0;
+        border-radius: 5px;
+    }
+    
+    .suggestion-item:hover {
+        background-color: #e3f2fd;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let currentWatchlist = [];
+    let stockUniverse = {};
+    
+    function loadWatchlist() {
+        fetch('/api/watchlist/current')
+            .then(response => response.json())
+            .then(data => {
+                currentWatchlist = data.current_watchlist;
+                document.getElementById('watchlist-count').textContent = data.total_stocks;
+                document.getElementById('last-updated').textContent = 
+                    new Date(data.last_updated).toLocaleString();
+                document.getElementById('update-reason').textContent = 
+                    data.reason || 'Manual selection';
+                
+                displayCurrentWatchlist();
+            });
+    }
+    
+    function loadUniverse() {
+        fetch('/api/watchlist/universe')
+            .then(response => response.json())
+            .then(data => {
+                stockUniverse = {};
+                data.stocks.forEach(stock => {
+                    stockUniverse[stock.ticker] = stock;
+                });
+                
+                document.getElementById('universe-count').textContent = data.total;
+                displayUniverse();
+                loadSuggestions();
+            });
+    }
+    
+    function displayCurrentWatchlist() {
+        const container = document.getElementById('current-watchlist');
+        
+        if (currentWatchlist.length === 0) {
+            container.innerHTML = '<div class="alert alert-warning">No stocks in watchlist</div>';
+            return;
+        }
+        
+        container.innerHTML = currentWatchlist.map(ticker => {
+            const stock = stockUniverse[ticker] || {};
+            return `
+                <div class="list-group-item stock-item selected" data-ticker="${ticker}">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>${ticker}</strong>
+                            <br>
+                            <small class="text-muted">${stock.company_name || ''}</small>
+                        </div>
+                        <div>
+                            <span class="badge bg-primary">${stock.exchange || ''}</span>
+                            <span class="badge bg-secondary">${stock.sector || ''}</span>
+                            <button class="btn btn-sm btn-danger ms-2" 
+                                    onclick="removeFromWatchlist('${ticker}')">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    function displayUniverse(filter = '') {
+        const container = document.getElementById('stock-universe');
+        let stocks = Object.values(stockUniverse);
+        
+        if (filter) {
+            stocks = stocks.filter(s => s.exchange === filter);
+        }
+        
+        container.innerHTML = stocks.map(stock => {
+            const isSelected = currentWatchlist.includes(stock.ticker);
+            return `
+                <div class="list-group-item stock-item ${isSelected ? 'selected' : ''}" 
+                     data-ticker="${stock.ticker}"
+                     onclick="toggleStock('${stock.ticker}')">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>${stock.ticker}</strong>
+                            <br>
+                            <small class="text-muted">${stock.company_name}</small>
+                        </div>
+                        <div>
+                            <span class="badge bg-primary">${stock.exchange}</span>
+                            <span class="badge bg-secondary">${stock.sector}</span>
+                            ${isSelected ? '<i class="bi bi-check-circle text-success ms-2"></i>' : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    function toggleStock(ticker) {
+        const index = currentWatchlist.indexOf(ticker);
+        if (index > -1) {
+            currentWatchlist.splice(index, 1);
+        } else {
+            currentWatchlist.push(ticker);
+        }
+        
+        displayCurrentWatchlist();
+        displayUniverse(document.getElementById('exchange-filter').value);
+        document.getElementById('watchlist-count').textContent = currentWatchlist.length;
+    }
+    
+    function removeFromWatchlist(ticker) {
+        const index = currentWatchlist.indexOf(ticker);
+        if (index > -1) {
+            currentWatchlist.splice(index, 1);
+            displayCurrentWatchlist();
+            displayUniverse(document.getElementById('exchange-filter').value);
+            document.getElementById('watchlist-count').textContent = currentWatchlist.length;
+        }
+    }
+    
+    function clearWatchlist() {
+        if (confirm('Clear entire watchlist?')) {
+            currentWatchlist = [];
+            displayCurrentWatchlist();
+            displayUniverse(document.getElementById('exchange-filter').value);
+            document.getElementById('watchlist-count').textContent = 0;
+        }
+    }
+    
+    function saveWatchlist() {
+        const reason = document.getElementById('update-reason').value || 'Manual weekly update';
+        
+        fetch('/api/watchlist/update', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                stocks: currentWatchlist,
+                reason: reason
+            })
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                alert(`Watchlist saved with ${currentWatchlist.length} stocks!`);
+                loadWatchlist(); // Reload to get updated timestamp
+            } else {
+                alert('Error saving watchlist: ' + (result.detail || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            alert('Error saving watchlist: ' + error);
+        });
+    }
+    
+    function filterStocks() {
+        const filter = document.getElementById('exchange-filter').value;
+        displayUniverse(filter);
+    }
+    
+    function loadSuggestions() {
+        fetch('/api/watchlist/suggestions')
+            .then(response => response.json())
+            .then(suggestions => {
+                // Display earnings suggestions
+                const earningsDiv = document.getElementById('earnings-suggestions');
+                earningsDiv.innerHTML = suggestions.earnings.map(ticker => {
+                    const stock = stockUniverse[ticker] || {};
+                    const catalyst = suggestions.catalyst_date[ticker] || '';
+                    return `
+                        <div class="suggestion-item" onclick="toggleStock('${ticker}')">
+                            <strong>${ticker}</strong> - ${stock.company_name || ''}
+                            <br><small class="text-danger">${catalyst}</small>
+                        </div>
+                    `;
+                }).join('');
+                
+                // Display high volume suggestions
+                const volumeDiv = document.getElementById('volume-suggestions');
+                volumeDiv.innerHTML = suggestions.high_volume.map(ticker => {
+                    const stock = stockUniverse[ticker] || {};
+                    return `
+                        <div class="suggestion-item" onclick="toggleStock('${ticker}')">
+                            <strong>${ticker}</strong> - ${stock.company_name || ''}
+                            <br><small class="text-success">High RVOL</small>
+                        </div>
+                    `;
+                }).join('');
+                
+                // Display volatility suggestions
+                const volatileDiv = document.getElementById('volatility-suggestions');
+                volatileDiv.innerHTML = suggestions.volatile.map(ticker => {
+                    const stock = stockUniverse[ticker] || {};
+                    return `
+                        <div class="suggestion-item" onclick="toggleStock('${ticker}')">
+                            <strong>${ticker}</strong> - ${stock.company_name || ''}
+                            <br><small class="text-warning">High ATR</small>
+                        </div>
+                    `;
+                }).join('');
+            });
+    }
+    
+    // Load data on page load
+    loadUniverse();
+    loadWatchlist();
+</script>
+{% endblock %}

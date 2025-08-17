@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+
+{% block title %}News Sources - MVP News Trading{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+            <li class="breadcrumb-item active">News Sources</li>
+        </ol>
+    </nav>
+
+    <h2 class="mb-4">📰 News Sources (Step 1)</h2>
+    
+    <div class="row">
+        <!-- Configuration -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Configuration</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tr><td><strong>AI Model:</strong></td><td>Gemini Pro 2.5</td></tr>
+                        <tr><td><strong>Data Source:</strong></td><td>Google Search + News API</td></tr>
+                        <tr><td><strong>Scan Frequency:</strong></td><td>Every 30 minutes</td></tr>
+                        <tr><td><strong>Market Hours:</strong></td><td>9:00 - 17:30 CET</td></tr>
+                        <tr><td><strong>Focus:</strong></td><td>Material news, earnings, M&A</td></tr>
+                        <tr><td><strong>Latency Target:</strong></td><td>&lt; 30 seconds</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Current Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-clock"></i> Next scan in <span id="next-scan">25</span> minutes
+                    </div>
+                    <h6>Today's Performance</h6>
+                    <ul>
+                        <li>Articles scanned: <strong>45</strong></li>
+                        <li>Relevant news found: <strong>3</strong></li>
+                        <li>Average latency: <strong>2.3s</strong></li>
+                        <li>Errors: <strong>0</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Prompt -->
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">AI Prompt Used</h5>
+        </div>
+        <div class="card-body">
+            <pre class="bg-light p-3"><code>You are a financial news analyst monitoring EU stocks for day trading opportunities.
+
+TASK: Search for recent news (last 2 hours) about these companies:
+{watchlist_stocks}
+
+FOCUS ON:
+1. Earnings announcements or guidance changes
+2. M&A activity (acquisitions, mergers, divestitures)
+3. Regulatory approvals or setbacks (FDA, EU approvals)
+4. Major contract wins or losses
+5. Management changes (CEO, CFO)
+6. Legal issues (lawsuits, settlements)
+7. Product launches or recalls
+
+For each relevant news item found, provide:
+- Company ticker
+- Headline
+- Source and timestamp
+- Sentiment: POSITIVE/NEGATIVE/NEUTRAL
+- Materiality score (1-10)
+- Brief 1-sentence summary
+
+Ignore minor news, analyst opinions, or technical analysis.
+Only report material events that could move the stock price.</code></pre>
+        </div>
+    </div>
+
+    <!-- Recent News -->
+    <div class="card mb-4">
+        <div class="card-header bg-warning">
+            <h5 class="mb-0">Recent News Found</h5>
+        </div>
+        <div class="card-body" style="height: 400px; overflow-y: auto;">
+            <div id="news-feed">
+                <!-- Real-time news will be loaded here -->
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i> <strong>Time-Critical News Only</strong>
+                    <br>System configured to show ONLY news from the last 4 hours
+                    <br>Current time: <span id="current-time"></span>
+                </div>
+                <div id="live-news-items">
+                    <!-- News will be dynamically loaded -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Output Example -->
+    <div class="card">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">Latest AI Output</h5>
+        </div>
+        <div class="card-body">
+            <pre class="bg-light p-3" style="max-height: 300px; overflow-y: auto;"><code>{
+  "timestamp": "2025-01-16T10:30:00Z",
+  "news_found": 2,
+  "processing_time": "2.3s",
+  "results": [
+    {
+      "ticker": "ASML.AS",
+      "headline": "ASML beats Q4 earnings expectations",
+      "source": "Reuters",
+      "timestamp": "2025-01-16T10:23:00Z",
+      "sentiment": "POSITIVE",
+      "materiality": 8,
+      "summary": "Dutch chip equipment maker reports 15% revenue growth, exceeding analyst estimates.",
+      "price_impact_estimate": "+2-3%"
+    },
+    {
+      "ticker": "SAP.DE",
+      "headline": "SAP announces 8,000 job cuts in restructuring",
+      "source": "Bloomberg",
+      "timestamp": "2025-01-16T09:45:00Z",
+      "sentiment": "NEGATIVE",
+      "materiality": 7,
+      "summary": "Software giant to cut 2.5% of workforce to focus on AI transformation.",
+      "price_impact_estimate": "-1-2%"
+    }
+  ],
+  "next_scan": "2025-01-16T11:00:00Z"
+}</code></pre>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Update current time display
+    function updateCurrentTime() {
+        const now = new Date();
+        const timeStr = now.toLocaleString('en-GB', { 
+            timeZone: 'Europe/Amsterdam',
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        }) + ' CET';
+        document.getElementById('current-time').textContent = timeStr;
+    }
+    
+    // Update countdown timer
+    let minutes = 25;
+    setInterval(() => {
+        minutes--;
+        if (minutes < 0) minutes = 30;
+        document.getElementById('next-scan').textContent = minutes;
+    }, 60000);
+    
+    // Function to calculate age of news
+    function getNewsAge(timestamp) {
+        const now = new Date();
+        const newsTime = new Date(timestamp);
+        const diffMs = now - newsTime;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMins / 60);
+        
+        if (diffMins < 60) {
+            return `${diffMins} minutes ago`;
+        } else if (diffHours < 24) {
+            return `${diffHours} hours ago`;
+        } else {
+            return `${Math.floor(diffHours / 24)} days ago`;
+        }
+    }
+    
+    // Function to determine if news is fresh
+    function isNewsFresh(timestamp) {
+        const now = new Date();
+        const newsTime = new Date(timestamp);
+        const diffHours = (now - newsTime) / (1000 * 60 * 60);
+        return diffHours <= 4; // News is fresh if less than 4 hours old
+    }
+    
+    // Load real news (when API is ready)
+    function loadLatestNews() {
+        // This will be connected to the actual API
+        const mockNews = [
+            {
+                ticker: "ASML.AS",
+                headline: "ASML shares rise on semiconductor demand outlook",
+                source: "Reuters",
+                timestamp: new Date(Date.now() - 45 * 60000).toISOString(), // 45 mins ago
+                sentiment: "positive",
+                materiality: 7
+            },
+            {
+                ticker: "SAP.DE",
+                headline: "SAP announces cloud revenue growth acceleration",
+                source: "Bloomberg",
+                timestamp: new Date(Date.now() - 2 * 3600000).toISOString(), // 2 hours ago
+                sentiment: "positive",
+                materiality: 6
+            }
+        ];
+        
+        const container = document.getElementById('live-news-items');
+        container.innerHTML = '';
+        
+        mockNews.forEach(news => {
+            const isFresh = isNewsFresh(news.timestamp);
+            const age = getNewsAge(news.timestamp);
+            
+            const newsHtml = `
+                <div class="news-item mb-3 p-3 border rounded ${isFresh ? '' : 'opacity-50'}">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="mb-1">${news.ticker}</h6>
+                            <p class="mb-1"><strong>${news.headline}</strong></p>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-${news.sentiment === 'positive' ? 'success' : news.sentiment === 'negative' ? 'danger' : 'secondary'}">
+                                ${news.sentiment.toUpperCase()}
+                            </span>
+                            ${isFresh ? '<span class="badge bg-info ms-1">FRESH</span>' : '<span class="badge bg-warning ms-1">OLD</span>'}
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <small class="text-muted">${news.source}</small>
+                        <small class="text-${isFresh ? 'success' : 'danger'} fw-bold">
+                            <i class="bi bi-clock"></i> ${age}
+                        </small>
+                    </div>
+                    <small class="text-muted">Exact time: ${new Date(news.timestamp).toLocaleString()}</small>
+                    <div class="mt-2">
+                        <small>Materiality: ${news.materiality}/10</small>
+                    </div>
+                </div>
+            `;
+            container.innerHTML += newsHtml;
+        });
+    }
+    
+    // Initialize
+    updateCurrentTime();
+    setInterval(updateCurrentTime, 1000);
+    loadLatestNews();
+    
+    // Refresh news every 5 minutes
+    setInterval(loadLatestNews, 300000);
+</script>
+{% endblock %}

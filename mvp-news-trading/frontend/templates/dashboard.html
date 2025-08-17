@@ -1,0 +1,787 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - MVP News Trading{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Portfolio Stats -->
+    <div class="col-12 mb-4">
+        <div class="row g-3">
+            <div class="col-md-2">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">Portfolio Value</h6>
+                        <h4 class="card-title" id="portfolio-value">$100,000</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">Daily P&L</h6>
+                        <h4 class="card-title" id="daily-pnl">$0</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">Open Positions</h6>
+                        <h4 class="card-title" id="open-positions">0</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">Today's Trades</h6>
+                        <h4 class="card-title" id="today-trades">0</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">Win Rate</h6>
+                        <h4 class="card-title" id="win-rate">0%</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">Risk Used</h6>
+                        <h4 class="card-title" id="risk-used">0%</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trading Pipeline Visualization -->
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-diagram-3"></i> Trading Pipeline
+                    <small class="text-muted float-end">Real-time Status</small>
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="pipeline-container">
+                    <div class="row justify-content-center text-center">
+                        <!-- Step 0: Weekly Watchlist -->
+                        <div class="col-md-2">
+                            <a href="/pipeline/watchlist" class="text-decoration-none">
+                                <div class="pipeline-stage" id="stage-watchlist">
+                                    <div class="stage-icon">📋</div>
+                                    <div class="stage-name">Weekly Watchlist</div>
+                                    <div class="stage-status badge bg-warning">Manual</div>
+                                    <div class="stage-details mt-2">
+                                        <small class="text-muted">10 stocks selected</small>
+                                    </div>
+                                </div>
+                            </a>
+                            <div class="pipeline-arrow">→</div>
+                        </div>
+
+                        <!-- News Sources -->
+                        <div class="col-md-2">
+                            <a href="/pipeline/news" class="text-decoration-none">
+                                <div class="pipeline-stage" id="stage-news">
+                                    <div class="stage-icon">📰</div>
+                                    <div class="stage-name">News Sources</div>
+                                    <div class="stage-status badge bg-secondary">Idle</div>
+                                    <div class="stage-details mt-2">
+                                        <small class="text-muted">Gemini AI Scanner</small>
+                                    </div>
+                                </div>
+                            </a>
+                            <div class="pipeline-arrow">→</div>
+                        </div>
+
+                        <!-- Scout Agent -->
+                        <div class="col-md-2">
+                            <a href="/pipeline/scout" class="text-decoration-none">
+                                <div class="pipeline-stage" id="stage-scout">
+                                    <div class="stage-icon">🔍</div>
+                                    <div class="stage-name">Scout Agent</div>
+                                    <div class="stage-status badge bg-secondary">Idle</div>
+                                    <div class="stage-details mt-2">
+                                        <small class="text-muted">Monitoring 10 stocks</small>
+                                    </div>
+                                </div>
+                            </a>
+                            <div class="pipeline-arrow">→</div>
+                        </div>
+
+                        <!-- Analyst Agent -->
+                        <div class="col-md-2">
+                            <a href="/pipeline/analyst" class="text-decoration-none">
+                                <div class="pipeline-stage" id="stage-analyst">
+                                    <div class="stage-icon">📊</div>
+                                    <div class="stage-name">Analyst Agent</div>
+                                    <div class="stage-status badge bg-secondary">Idle</div>
+                                    <div class="stage-details mt-2">
+                                        <small class="text-muted">Signal Generation</small>
+                                    </div>
+                                </div>
+                            </a>
+                            <div class="pipeline-arrow">→</div>
+                        </div>
+
+                        <!-- Risk Manager -->
+                        <div class="col-md-2">
+                            <a href="/pipeline/risk" class="text-decoration-none">
+                                <div class="pipeline-stage" id="stage-risk">
+                                    <div class="stage-icon">⚖️</div>
+                                    <div class="stage-name">Risk Manager</div>
+                                    <div class="stage-status badge bg-secondary">Idle</div>
+                                    <div class="stage-details mt-2">
+                                        <small class="text-muted">Position Sizing</small>
+                                    </div>
+                                </div>
+                            </a>
+                            <div class="pipeline-arrow">→</div>
+                        </div>
+
+                        <!-- Executor -->
+                        <div class="col-md-2">
+                            <a href="/pipeline/executor" class="text-decoration-none">
+                                <div class="pipeline-stage" id="stage-executor">
+                                    <div class="stage-icon">🎯</div>
+                                    <div class="stage-name">Executor</div>
+                                    <div class="stage-status badge bg-secondary">Idle</div>
+                                    <div class="stage-details mt-2">
+                                        <small class="text-muted">Order Management</small>
+                                    </div>
+                                </div>
+                            </a>
+                            <div class="pipeline-arrow">→</div>
+                        </div>
+
+                        <!-- Alpaca -->
+                        <div class="col-md-2">
+                            <a href="/pipeline/alpaca" class="text-decoration-none">
+                                <div class="pipeline-stage" id="stage-alpaca">
+                                    <div class="stage-icon">🦙</div>
+                                    <div class="stage-name">Alpaca</div>
+                                    <div class="stage-status badge bg-success">Connected</div>
+                                    <div class="stage-details mt-2">
+                                        <small class="text-muted">Paper Trading</small>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity & Active Signals -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-activity"></i> Recent Activity
+                </h5>
+            </div>
+            <div class="card-body" style="height: 400px; overflow-y: auto;">
+                <div id="activity-feed">
+                    <div class="activity-item">
+                        <span class="badge bg-info">System</span>
+                        <small class="text-muted">Waiting for activity...</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-lightning"></i> Active Signals
+                </h5>
+            </div>
+            <div class="card-body" style="height: 400px; overflow-y: auto;">
+                <div id="signals-list">
+                    <div class="alert alert-info">
+                        No active signals at the moment
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Webhook Section -->
+    <div class="col-12 mt-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-send"></i> Test Webhook Prediction
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <input type="text" class="form-control" id="test-ticker" placeholder="Ticker (e.g., AAPL)" value="AAPL">
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-control" id="test-direction">
+                            <option value="BUY">BUY</option>
+                            <option value="SELL">SELL</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" class="form-control" id="test-confidence" placeholder="Confidence" value="85" min="0" max="100">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" class="form-control" id="test-reasoning" placeholder="Reasoning" value="Strong breakout pattern">
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary w-100" onclick="sendTestWebhook()">
+                            <i class="bi bi-send"></i> Send Test
+                        </button>
+                    </div>
+                </div>
+                <div id="webhook-result" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stage Details Modal -->
+<div class="modal fade" id="stageDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="stage-modal-title">Stage Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="stage-modal-body">
+                <!-- Stage details will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .pipeline-container {
+        padding: 20px;
+    }
+    
+    .pipeline-stage {
+        padding: 15px;
+        border: 2px solid #dee2e6;
+        border-radius: 10px;
+        background: white;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .pipeline-stage.active {
+        border-color: #0d6efd;
+        background: #e7f3ff;
+        transform: scale(1.05);
+    }
+    
+    .pipeline-stage.processing {
+        border-color: #ffc107;
+        background: #fff3cd;
+        animation: pulse 1.5s infinite;
+    }
+    
+    .pipeline-stage.success {
+        border-color: #198754;
+        background: #d1e7dd;
+    }
+    
+    .pipeline-stage.error {
+        border-color: #dc3545;
+        background: #f8d7da;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    
+    .stage-icon {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+    }
+    
+    .stage-name {
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .pipeline-arrow {
+        font-size: 2rem;
+        color: #6c757d;
+        margin-top: 30px;
+    }
+    
+    .activity-item {
+        padding: 8px;
+        border-bottom: 1px solid #e9ecef;
+        animation: fadeIn 0.5s;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+    }
+    
+    .card-title {
+        margin-bottom: 0;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // WebSocket handlers for real-time updates
+    socket.on('pipeline_update', function(stages) {
+        console.log('Pipeline update:', stages);
+        updatePipelineVisualization(stages);
+    });
+    
+    socket.on('portfolio_update', function(stats) {
+        console.log('Portfolio update:', stats);
+        updatePortfolioStats(stats);
+    });
+    
+    socket.on('activity_update', function(activity) {
+        addActivityItem(activity);
+    });
+    
+    // Update pipeline visualization
+    function updatePipelineVisualization(stages) {
+        stages.forEach(stage => {
+            const element = document.getElementById(`stage-${stage.id}`);
+            if (element) {
+                // Remove all state classes
+                element.classList.remove('active', 'processing', 'success', 'error');
+                
+                // Add appropriate class based on status
+                if (stage.status === 'active') {
+                    element.classList.add('active');
+                } else if (stage.status === 'processing') {
+                    element.classList.add('processing');
+                } else if (stage.status === 'success') {
+                    element.classList.add('success');
+                } else if (stage.status === 'error') {
+                    element.classList.add('error');
+                }
+                
+                // Update status badge
+                const statusBadge = element.querySelector('.stage-status');
+                if (statusBadge) {
+                    statusBadge.textContent = stage.status.charAt(0).toUpperCase() + stage.status.slice(1);
+                    statusBadge.className = 'stage-status badge';
+                    
+                    if (stage.status === 'idle') {
+                        statusBadge.classList.add('bg-secondary');
+                    } else if (stage.status === 'active' || stage.status === 'processing') {
+                        statusBadge.classList.add('bg-warning');
+                    } else if (stage.status === 'success') {
+                        statusBadge.classList.add('bg-success');
+                    } else if (stage.status === 'error') {
+                        statusBadge.classList.add('bg-danger');
+                    }
+                }
+            }
+        });
+    }
+    
+    // Update portfolio statistics
+    function updatePortfolioStats(stats) {
+        document.getElementById('portfolio-value').textContent = `$${stats.total_value.toLocaleString()}`;
+        
+        const pnlElement = document.getElementById('daily-pnl');
+        const pnl = stats.daily_pnl || 0;
+        pnlElement.textContent = `$${pnl.toLocaleString()}`;
+        pnlElement.className = pnl >= 0 ? 'card-title text-success' : 'card-title text-danger';
+        
+        document.getElementById('open-positions').textContent = stats.open_positions || 0;
+        document.getElementById('today-trades').textContent = stats.today_trades || 0;
+        document.getElementById('win-rate').textContent = `${stats.win_rate || 0}%`;
+        
+        // Calculate risk used (trades today / max trades)
+        const riskUsed = (stats.today_trades / 3) * 100;
+        document.getElementById('risk-used').textContent = `${riskUsed.toFixed(0)}%`;
+    }
+    
+    // Add activity item to feed
+    function addActivityItem(activity) {
+        const feed = document.getElementById('activity-feed');
+        const item = document.createElement('div');
+        item.className = 'activity-item';
+        
+        const time = new Date().toLocaleTimeString();
+        item.innerHTML = `
+            <span class="badge bg-${activity.type || 'info'}">${activity.label || 'Info'}</span>
+            <small class="text-muted ms-2">${time}</small>
+            <div>${activity.message}</div>
+        `;
+        
+        // Add to top of feed
+        feed.insertBefore(item, feed.firstChild);
+        
+        // Keep only last 50 items
+        while (feed.children.length > 50) {
+            feed.removeChild(feed.lastChild);
+        }
+    }
+    
+    // Send test webhook
+    function sendTestWebhook() {
+        const data = {
+            ticker: document.getElementById('test-ticker').value,
+            prediction: {
+                direction: document.getElementById('test-direction').value,
+                confidence: parseInt(document.getElementById('test-confidence').value)
+            },
+            source: 'dashboard_test',
+            reasoning: document.getElementById('test-reasoning').value
+        };
+        
+        fetch('/api/test-webhook', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            const resultDiv = document.getElementById('webhook-result');
+            if (result.success) {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle"></i> Webhook sent successfully!
+                        <pre class="mt-2">${JSON.stringify(result.response, null, 2)}</pre>
+                    </div>
+                `;
+                
+                // Simulate pipeline processing
+                simulatePipelineProcessing();
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="bi bi-x-circle"></i> Error: ${result.error}
+                    </div>
+                `;
+            }
+        });
+    }
+    
+    // Simulate pipeline processing animation
+    function simulatePipelineProcessing() {
+        const stages = ['watchlist', 'news', 'scout', 'analyst', 'risk', 'executor', 'alpaca'];
+        let currentStage = 0;
+        
+        const processNextStage = () => {
+            if (currentStage > 0) {
+                // Mark previous stage as success
+                const prevElement = document.getElementById(`stage-${stages[currentStage - 1]}`);
+                prevElement.classList.remove('processing');
+                prevElement.classList.add('success');
+            }
+            
+            if (currentStage < stages.length) {
+                // Mark current stage as processing
+                const element = document.getElementById(`stage-${stages[currentStage]}`);
+                element.classList.add('processing');
+                
+                currentStage++;
+                setTimeout(processNextStage, 1000);
+            } else {
+                // Reset all stages after 3 seconds
+                setTimeout(() => {
+                    stages.forEach(stage => {
+                        const element = document.getElementById(`stage-${stage}`);
+                        element.classList.remove('processing', 'success');
+                    });
+                }, 3000);
+            }
+        };
+        
+        processNextStage();
+    }
+    
+    // Load initial data
+    function loadInitialData() {
+        // Load portfolio stats
+        fetch('/api/portfolio-stats')
+            .then(response => response.json())
+            .then(data => updatePortfolioStats(data));
+        
+        // Load active signals
+        fetch('/api/active-signals')
+            .then(response => response.json())
+            .then(signals => {
+                const signalsList = document.getElementById('signals-list');
+                if (signals.length > 0) {
+                    signalsList.innerHTML = signals.map(signal => `
+                        <div class="card mb-2">
+                            <div class="card-body">
+                                <h6>${signal.ticker} - ${signal.signal_type}</h6>
+                                <small>Confidence: ${signal.confidence}%</small>
+                                <div class="mt-2">
+                                    <span class="badge bg-${signal.status === 'approved' ? 'success' : 'warning'}">
+                                        ${signal.status}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            });
+    }
+    
+    // Show stage details modal
+    function showStageDetails(stage) {
+        const modal = new bootstrap.Modal(document.getElementById('stageDetailsModal'));
+        const title = document.getElementById('stage-modal-title');
+        const body = document.getElementById('stage-modal-body');
+        
+        const stageInfo = {
+            'watchlist': {
+                title: '📋 Weekly Watchlist Selection',
+                content: `
+                    <h6>Current Configuration</h6>
+                    <table class="table table-sm">
+                        <tr><td>Selection Mode:</td><td><span class="badge bg-warning">Manual</span></td></tr>
+                        <tr><td>Stocks Selected:</td><td>10 EU stocks</td></tr>
+                        <tr><td>Last Updated:</td><td>${new Date().toLocaleDateString()}</td></tr>
+                        <tr><td>Update Frequency:</td><td>Weekly (Sundays)</td></tr>
+                    </table>
+                    <h6 class="mt-3">Actions</h6>
+                    <div class="d-grid gap-2">
+                        <a href="/watchlist" class="btn btn-primary">
+                            <i class="bi bi-pencil"></i> Manage Watchlist
+                        </a>
+                        <button class="btn btn-info" onclick="viewCurrentWatchlist()">
+                            <i class="bi bi-eye"></i> View Current Stocks
+                        </button>
+                    </div>
+                    <h6 class="mt-3">Selection Criteria</h6>
+                    <ul>
+                        <li>High liquidity (>€10M daily volume)</li>
+                        <li>EU exchanges only (AEX, DAX, CAC40, etc.)</li>
+                        <li>Day trading suitable volatility</li>
+                        <li>Upcoming catalysts (earnings, news)</li>
+                    </ul>
+                    <div class="alert alert-info mt-3">
+                        <i class="bi bi-info-circle"></i> This is Step 0 - You manually select which stocks to monitor for the week
+                    </div>
+                `
+            },
+            'news': {
+                title: '📰 News Sources',
+                content: `
+                    <h6>Configuration</h6>
+                    <table class="table table-sm">
+                        <tr><td>Sources:</td><td>Gemini AI with Google Search</td></tr>
+                        <tr><td>Frequency:</td><td>Every 30 minutes</td></tr>
+                        <tr><td>Market Hours:</td><td>8:00 - 18:30 CET</td></tr>
+                        <tr><td>Focus:</td><td>Material news, earnings, M&A</td></tr>
+                    </table>
+                    <h6 class="mt-3">Recent Activity</h6>
+                    <div class="alert alert-info">
+                        <i class="bi bi-clock"></i> Next scan in 25 minutes
+                    </div>
+                    <h6>Performance</h6>
+                    <ul>
+                        <li>Articles scanned today: 45</li>
+                        <li>Relevant news found: 3</li>
+                        <li>Average latency: 2.3s</li>
+                    </ul>
+                `
+            },
+            'scout': {
+                title: '🔍 Scout Agent',
+                content: `
+                    <h6>Current Watchlist</h6>
+                    <div class="mb-3">
+                        <a href="/watchlist" class="btn btn-sm btn-primary">Manage Watchlist</a>
+                    </div>
+                    <table class="table table-sm">
+                        <thead>
+                            <tr><th>Ticker</th><th>Exchange</th><th>Last Check</th><th>News</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>ASML.AS</td><td>Amsterdam</td><td>5 min ago</td><td>0</td></tr>
+                            <tr><td>SAP.DE</td><td>Frankfurt</td><td>5 min ago</td><td>1</td></tr>
+                            <tr><td>MC.PA</td><td>Paris</td><td>5 min ago</td><td>0</td></tr>
+                        </tbody>
+                    </table>
+                    <h6>Settings</h6>
+                    <ul>
+                        <li>Scan interval: 30 minutes</li>
+                        <li>Stocks monitored: 10</li>
+                        <li>Material keywords: earnings, merger, FDA, lawsuit</li>
+                    </ul>
+                `
+            },
+            'analyst': {
+                title: '📊 Analyst Agent',
+                content: `
+                    <h6>Signal Generation Logic</h6>
+                    <table class="table table-sm">
+                        <tr><td>Confidence Threshold:</td><td>70%</td></tr>
+                        <tr><td>Sentiment Analysis:</td><td>Gemini AI</td></tr>
+                        <tr><td>Technical Indicators:</td><td>RSI, MACD, Volume</td></tr>
+                        <tr><td>News Weight:</td><td>40%</td></tr>
+                    </table>
+                    <h6 class="mt-3">Recent Signals</h6>
+                    <a href="/signals" class="btn btn-sm btn-info">View All Signals</a>
+                    <div class="mt-2">
+                        <span class="badge bg-success">3 BUY</span>
+                        <span class="badge bg-danger">1 SELL</span>
+                        <span class="badge bg-warning">2 PENDING</span>
+                    </div>
+                    <h6 class="mt-3">Performance</h6>
+                    <ul>
+                        <li>Signals generated today: 6</li>
+                        <li>Average confidence: 78%</li>
+                        <li>Win rate (30 days): 62%</li>
+                    </ul>
+                `
+            },
+            'risk': {
+                title: '⚖️ Risk Manager',
+                content: `
+                    <h6>Risk Parameters</h6>
+                    <table class="table table-sm">
+                        <tr><td>Max trades/day:</td><td>3</td></tr>
+                        <tr><td>Max risk/trade:</td><td>2%</td></tr>
+                        <tr><td>Max daily loss:</td><td>5%</td></tr>
+                        <tr><td>Position sizing:</td><td>Kelly Criterion</td></tr>
+                    </table>
+                    <h6 class="mt-3">Current Status</h6>
+                    <div class="progress mb-2">
+                        <div class="progress-bar" style="width: 33%">1/3 trades used</div>
+                    </div>
+                    <div class="progress mb-2">
+                        <div class="progress-bar bg-success" style="width: 10%">0.2% daily P&L</div>
+                    </div>
+                    <h6>Risk Checks</h6>
+                    <ul class="list-unstyled">
+                        <li>✅ Daily loss limit OK</li>
+                        <li>✅ Consecutive losses: 0</li>
+                        <li>✅ Portfolio exposure: 4.5%</li>
+                        <li>✅ Correlation check passed</li>
+                    </ul>
+                `
+            },
+            'executor': {
+                title: '🎯 Executor Agent',
+                content: `
+                    <h6>Execution Statistics</h6>
+                    <table class="table table-sm">
+                        <tr><td>Orders placed today:</td><td>1</td></tr>
+                        <tr><td>Fill rate:</td><td>100%</td></tr>
+                        <tr><td>Average slippage:</td><td>0.02%</td></tr>
+                        <tr><td>Open positions:</td><td>0</td></tr>
+                    </table>
+                    <h6 class="mt-3">Order Types</h6>
+                    <ul>
+                        <li>Market orders: 80%</li>
+                        <li>Limit orders: 20%</li>
+                        <li>Stop loss: Always set</li>
+                        <li>Take profit: 2:1 risk/reward</li>
+                    </ul>
+                    <h6>Recent Executions</h6>
+                    <a href="/trades" class="btn btn-sm btn-warning">View Trade History</a>
+                `
+            },
+            'alpaca': {
+                title: '🦙 Alpaca Integration',
+                content: `
+                    <h6>Account Status</h6>
+                    <table class="table table-sm">
+                        <tr><td>Mode:</td><td><span class="badge bg-warning">Paper Trading</span></td></tr>
+                        <tr><td>Balance:</td><td>$100,000</td></tr>
+                        <tr><td>Buying Power:</td><td>$95,500</td></tr>
+                        <tr><td>API Status:</td><td><span class="badge bg-success">Connected</span></td></tr>
+                    </table>
+                    <h6 class="mt-3">Configuration</h6>
+                    <ul>
+                        <li>Market: US Equities</li>
+                        <li>Order routing: Smart</li>
+                        <li>Extended hours: Disabled</li>
+                        <li>Fractional shares: Enabled</li>
+                    </ul>
+                    <h6>API Metrics</h6>
+                    <ul>
+                        <li>Requests today: 127</li>
+                        <li>Rate limit: 200/min</li>
+                        <li>Latency: 45ms avg</li>
+                    </ul>
+                `
+            }
+        };
+        
+        const info = stageInfo[stage] || { title: 'Unknown Stage', content: 'No information available' };
+        title.textContent = info.title;
+        body.innerHTML = info.content;
+        
+        modal.show();
+    }
+    
+    // Function to view current watchlist
+    function viewCurrentWatchlist() {
+        fetch('/api/watchlist/current')
+            .then(response => response.json())
+            .then(data => {
+                const stockList = data.current_watchlist.map(ticker => `<li>${ticker}</li>`).join('');
+                const modalBody = document.getElementById('stage-modal-body');
+                modalBody.innerHTML = `
+                    <h6>Current Weekly Watchlist (${data.total_stocks} stocks)</h6>
+                    <ul>${stockList}</ul>
+                    <div class="mt-3">
+                        <a href="/watchlist" class="btn btn-primary">Edit Watchlist</a>
+                    </div>
+                `;
+                
+                // Update the watchlist count in the pipeline
+                const watchlistStage = document.querySelector('#stage-watchlist .stage-details small');
+                if (watchlistStage) {
+                    watchlistStage.textContent = `${data.total_stocks} stocks selected`;
+                }
+            });
+    }
+    
+    // Load data on page load
+    loadInitialData();
+    loadWatchlistCount();
+    
+    // Function to load watchlist count
+    function loadWatchlistCount() {
+        fetch('/api/watchlist/current')
+            .then(response => response.json())
+            .then(data => {
+                const watchlistStage = document.querySelector('#stage-watchlist .stage-details small');
+                if (watchlistStage) {
+                    watchlistStage.textContent = `${data.total_stocks} stocks selected`;
+                }
+            });
+    }
+    
+    // Refresh data every 10 seconds
+    setInterval(loadInitialData, 10000);
+</script>
+{% endblock %}

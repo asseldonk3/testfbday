@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Active Signals - MVP News Trading{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-lightning"></i> Active Trading Signals
+                    <span class="badge bg-primary ms-2" id="signal-count">0</span>
+                    <button class="btn btn-sm btn-primary float-end" onclick="refreshSignals()">
+                        <i class="bi bi-arrow-clockwise"></i> Refresh
+                    </button>
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row" id="signals-container">
+                    <div class="col-12 text-center text-muted">
+                        <p>Loading signals...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function loadSignals() {
+        fetch('/api/active-signals')
+            .then(response => response.json())
+            .then(signals => {
+                const container = document.getElementById('signals-container');
+                document.getElementById('signal-count').textContent = signals.length;
+                
+                if (signals.length === 0) {
+                    container.innerHTML = `
+                        <div class="col-12">
+                            <div class="alert alert-info text-center">
+                                <i class="bi bi-info-circle"></i> No active signals at the moment
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = signals.map(signal => `
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card h-100 ${getSignalCardClass(signal.status)}">
+                            <div class="card-header">
+                                <h6 class="mb-0">
+                                    ${signal.ticker} 
+                                    <span class="badge bg-${signal.signal_type === 'BUY' ? 'success' : 'danger'} float-end">
+                                        ${signal.signal_type}
+                                    </span>
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-2">
+                                    <small class="text-muted">Confidence</small>
+                                    <div class="progress">
+                                        <div class="progress-bar ${getConfidenceClass(signal.confidence)}" 
+                                             style="width: ${signal.confidence}%">
+                                            ${signal.confidence}%
+                                        </div>
+                                    </div>
+                                </div>
+                                <table class="table table-sm">
+                                    <tr>
+                                        <td>Entry:</td>
+                                        <td>$${signal.entry_price?.toFixed(2) || '-'}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Stop Loss:</td>
+                                        <td>$${signal.stop_loss?.toFixed(2) || '-'}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Target:</td>
+                                        <td>$${signal.target_price?.toFixed(2) || '-'}</td>
+                                    </tr>
+                                </table>
+                                <div class="mt-2">
+                                    <small class="text-muted">Reasoning:</small>
+                                    <p class="small mb-0">${signal.reasoning || 'AI-generated signal'}</p>
+                                </div>
+                                <div class="mt-2">
+                                    <span class="badge bg-${getStatusBadgeColor(signal.status)}">
+                                        ${signal.status.toUpperCase()}
+                                    </span>
+                                    <small class="text-muted float-end">
+                                        ${new Date(signal.created_at).toLocaleTimeString()}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            })
+            .catch(error => {
+                console.error('Error loading signals:', error);
+                document.getElementById('signals-container').innerHTML = `
+                    <div class="col-12">
+                        <div class="alert alert-danger">
+                            <i class="bi bi-x-circle"></i> Error loading signals
+                        </div>
+                    </div>
+                `;
+            });
+    }
+    
+    function getSignalCardClass(status) {
+        const classes = {
+            'pending': 'border-warning',
+            'analyzed': 'border-info',
+            'approved': 'border-success',
+            'rejected': 'border-danger',
+            'executed': 'border-primary'
+        };
+        return classes[status] || '';
+    }
+    
+    function getConfidenceClass(confidence) {
+        if (confidence >= 80) return 'bg-success';
+        if (confidence >= 60) return 'bg-warning';
+        return 'bg-danger';
+    }
+    
+    function getStatusBadgeColor(status) {
+        const colors = {
+            'pending': 'warning',
+            'analyzed': 'info',
+            'approved': 'success',
+            'rejected': 'danger',
+            'executed': 'primary'
+        };
+        return colors[status] || 'secondary';
+    }
+    
+    function refreshSignals() {
+        const container = document.getElementById('signals-container');
+        container.innerHTML = `
+            <div class="col-12 text-center">
+                <span class="spinner-border spinner-border-sm"></span> Refreshing...
+            </div>
+        `;
+        setTimeout(loadSignals, 500);
+    }
+    
+    // Load signals on page load
+    loadSignals();
+    
+    // Auto-refresh every 15 seconds
+    setInterval(loadSignals, 15000);
+    
+    // Listen for signal updates via WebSocket
+    socket.on('signals_update', function(signals) {
+        loadSignals();
+    });
+</script>
+{% endblock %}

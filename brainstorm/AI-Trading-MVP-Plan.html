@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Trading System - MVP Plan</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .subtitle {
+            font-size: 1.3em;
+            opacity: 0.95;
+            margin-bottom: 40px;
+        }
+        
+        .executive-summary {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+        
+        .metric-card {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            padding: 20px 30px;
+            border-radius: 15px;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+        
+        .metric-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+        
+        .metric-value {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .strategy-section {
+            margin-bottom: 60px;
+        }
+        
+        h2 {
+            color: #667eea;
+            font-size: 2.2em;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #f0f0f0;
+        }
+        
+        .strategy-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-left: 5px solid #667eea;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .strategy-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+        
+        .strategy-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .strategy-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+        
+        h3 {
+            color: #2c3e50;
+            font-size: 1.8em;
+            flex: 1;
+        }
+        
+        .strategy-tag {
+            background: #e74c3c;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        
+        .strategy-tag.primary {
+            background: #27ae60;
+        }
+        
+        .strategy-tag.secondary {
+            background: #f39c12;
+        }
+        
+        .description-box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .example-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .example-title {
+            color: #856404;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        
+        .timeline {
+            list-style: none;
+            padding-left: 20px;
+            border-left: 3px solid #ffc107;
+        }
+        
+        .timeline li {
+            position: relative;
+            padding-left: 20px;
+            margin-bottom: 10px;
+            color: #495057;
+        }
+        
+        .timeline li:before {
+            content: "•";
+            position: absolute;
+            left: -7px;
+            color: #ffc107;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        
+        .pros-cons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .pros, .cons {
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .pros {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .cons {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .pros h4, .cons h4 {
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .pros h4 {
+            color: #155724;
+        }
+        
+        .cons h4 {
+            color: #721c24;
+        }
+        
+        ul {
+            list-style-position: inside;
+            margin-left: 10px;
+        }
+        
+        .pros ul li, .cons ul li {
+            margin-bottom: 8px;
+        }
+        
+        .success-factors {
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .success-factors h4 {
+            color: #004085;
+            margin-bottom: 15px;
+        }
+        
+        .architecture-section {
+            background: #f8f9fa;
+            padding: 40px;
+            border-radius: 15px;
+            margin: 40px 0;
+        }
+        
+        .agent-flow {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            border: 2px solid #667eea;
+        }
+        
+        .implementation-timeline {
+            margin: 40px 0;
+        }
+        
+        .week-block {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        
+        .week-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin: -25px -25px 20px -25px;
+        }
+        
+        .cost-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .cost-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+        
+        .cost-table td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .cost-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .cost-table .total {
+            background: #f8f9fa;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border: 3px solid #ffc107;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 40px 0;
+            text-align: center;
+        }
+        
+        .warning-box h3 {
+            color: #856404;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .cta-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+            border-radius: 15px;
+            margin: 40px 0;
+        }
+        
+        .cta-section h2 {
+            color: white;
+            border: none;
+            margin-bottom: 20px;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: white;
+            color: #667eea;
+            padding: 15px 40px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin: 10px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .risk-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .risk-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            text-align: center;
+        }
+        
+        .risk-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .risk-label {
+            color: #6c757d;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+            
+            .pros-cons {
+                grid-template-columns: 1fr;
+            }
+            
+            .executive-summary {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🤖 AI-Powered Trading System</h1>
+            <div class="subtitle">Leveraging LLMs and Web Intelligence for Automated Trading</div>
+            
+            <div class="executive-summary">
+                <div class="metric-card">
+                    <div class="metric-label">Realistic Daily Target</div>
+                    <div class="metric-value">€50-150</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Starting Capital</div>
+                    <div class="metric-value">€5,000</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Time to MVP</div>
+                    <div class="metric-value">6 Weeks</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Monthly Costs</div>
+                    <div class="metric-value">€500</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Success Rate</div>
+                    <div class="metric-value">25-30%</div>
+                </div>
+            </div>
+        </header>
+        
+        <div class="content">
+            <section class="strategy-section">
+                <h2>📊 Trading Strategies</h2>
+                
+                <!-- Strategy 1 -->
+                <div class="strategy-card">
+                    <div class="strategy-header">
+                        <div class="strategy-number">1</div>
+                        <h3>News-Based Trading</h3>
+                        <span class="strategy-tag primary">Primary</span>
+                    </div>
+                    
+                    <div class="description-box">
+                        <p><strong>What This Strategy Is:</strong></p>
+                        <p>News-based trading means buying or selling stocks immediately after important news comes out. Think of it like being the first person to act on breaking information. When a company announces something big (like buying another company, reporting surprise profits, or getting FDA approval for a drug), the stock price will move. Our AI system reads the news, understands if it's good or bad, and trades within seconds.</p>
+                    </div>
+                    
+                    <div class="example-box">
+                        <div class="example-title">📈 Real Example: Microsoft Acquisition</div>
+                        <ul class="timeline">
+                            <li><strong>10:30:00 AM:</strong> Microsoft announces they're buying Discord for $15 billion</li>
+                            <li><strong>10:30:05 AM:</strong> Our AI reads and understands this is positive news</li>
+                            <li><strong>10:30:10 AM:</strong> AI buys Microsoft stock at $300</li>
+                            <li><strong>10:35:00 AM:</strong> Stock rises to $303 as more people learn about the news</li>
+                            <li><strong>10:35:00 AM:</strong> AI sells for $3 profit per share (1% gain)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="pros-cons">
+                        <div class="pros">
+                            <h4>✅ Why It Will Work</h4>
+                            <ul>
+                                <li>LLM understands complex narratives in seconds</li>
+                                <li>30-90 second window before full market pricing</li>
+                                <li>Process 1000x more sources than humans</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h4>⚠️ Why It Might Fail</h4>
+                            <ul>
+                                <li>HFT firms process news in microseconds</li>
+                                <li>Fake news and manipulation risks</li>
+                                <li>Wide spreads during volatile events</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="success-factors">
+                        <h4>🎯 Key Success Factors</h4>
+                        <ul>
+                            <li>Focus on complex news requiring interpretation</li>
+                            <li>Trade mid-cap stocks ($2-10B) that HFTs avoid</li>
+                            <li>Enter 2-5 minutes after initial spike when HFTs unwind</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Strategy 2 -->
+                <div class="strategy-card">
+                    <div class="strategy-header">
+                        <div class="strategy-number">2</div>
+                        <h3>Gap and Go Trading</h3>
+                        <span class="strategy-tag secondary">Secondary</span>
+                    </div>
+                    
+                    <div class="description-box">
+                        <p><strong>What This Strategy Is:</strong></p>
+                        <p>A "gap" happens when a stock opens at a very different price than where it closed yesterday - like a store suddenly raising prices overnight. This usually happens because important news came out after the market closed. "Gap and Go" means finding stocks that opened much higher (or lower) than yesterday's close and betting they'll keep moving in that same direction for the first 30 minutes of trading.</p>
+                    </div>
+                    
+                    <div class="example-box">
+                        <div class="example-title">📈 Real Example: Tesla Gap Up</div>
+                        <ul class="timeline">
+                            <li><strong>Yesterday:</strong> Tesla closed at $200</li>
+                            <li><strong>Overnight:</strong> Tesla announces record deliveries</li>
+                            <li><strong>9:30 AM:</strong> Tesla opens at $210 (5% gap up)</li>
+                            <li><strong>9:30 AM:</strong> Our AI confirms the news is real and strong</li>
+                            <li><strong>9:35 AM:</strong> AI buys at $211 as momentum builds</li>
+                            <li><strong>9:50 AM:</strong> Tesla reaches $215</li>
+                            <li><strong>9:50 AM:</strong> AI sells for $4 profit per share (1.9% gain)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="pros-cons">
+                        <div class="pros">
+                            <h4>✅ Why It Will Work</h4>
+                            <ul>
+                                <li>AI qualifies catalysts better than scanners</li>
+                                <li>Overnight risk premium creates patterns</li>
+                                <li>Opening auction inefficiencies exploitable</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h4>⚠️ Why It Might Fail</h4>
+                            <ul>
+                                <li>60% of gaps fail within first hour</li>
+                                <li>Well-known strategy with competition</li>
+                                <li>Pre-market liquidity often misleading</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="success-factors">
+                        <h4>🎯 Key Success Factors</h4>
+                        <ul>
+                            <li>Only trade gaps with AI-verified catalysts (score >70%)</li>
+                            <li>Exit quickly - maximum 30-minute holds</li>
+                            <li>Focus on gaps between 3-7% (sweet spot)</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Strategy 3 -->
+                <div class="strategy-card">
+                    <div class="strategy-header">
+                        <div class="strategy-number">3</div>
+                        <h3>Social Momentum Scalping</h3>
+                        <span class="strategy-tag">Experimental</span>
+                    </div>
+                    
+                    <div class="description-box">
+                        <p><strong>What This Strategy Is:</strong></p>
+                        <p>This strategy watches social media (Reddit, Twitter, TikTok) for stocks that suddenly everyone is talking about. When thousands of retail traders all buy the same stock at once (like what happened with GameStop), it creates a quick price surge. We detect this surge early, ride the wave for 5-15 minutes, then get out before it crashes back down. It's like surfing - catch the wave, ride it briefly, get out before you wipe out.</p>
+                    </div>
+                    
+                    <div class="example-box">
+                        <div class="example-title">📈 Real Example: Reddit Momentum</div>
+                        <ul class="timeline">
+                            <li><strong>11:00 AM:</strong> 50 people mention $BBBY on Reddit</li>
+                            <li><strong>11:05 AM:</strong> Suddenly 500 people are talking about it</li>
+                            <li><strong>11:05:30 AM:</strong> Our AI detects this 10x increase in mentions</li>
+                            <li><strong>11:06 AM:</strong> AI buys BBBY at $5.00</li>
+                            <li><strong>11:08 AM:</strong> Stock spikes to $5.25 as more pile in</li>
+                            <li><strong>11:08 AM:</strong> AI sells immediately for $0.25 profit (5% gain)</li>
+                            <li><strong>11:15 AM:</strong> Stock crashes back to $4.80 (we're already out)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="pros-cons">
+                        <div class="pros">
+                            <h4>✅ Why It Will Work</h4>
+                            <ul>
+                                <li>Retail coordination creates 5-15 min pumps</li>
+                                <li>Social velocity detection beats humans</li>
+                                <li>FOMO psychology reliable in retail favorites</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h4>⚠️ Why It Might Fail</h4>
+                            <ul>
+                                <li>High manipulation risk (pump & dumps)</li>
+                                <li>Terrible spreads and liquidity</li>
+                                <li>SEC halt risk on unusual activity</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="success-factors">
+                        <h4>🎯 Key Success Factors</h4>
+                        <ul>
+                            <li>Only trade liquid stocks ($10-100 price range)</li>
+                            <li>Maximum 5-minute holds (get in and out fast)</li>
+                            <li>Avoid if >3 red flags in pump detection</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="architecture-section">
+                <h2>🏗️ AI Agent Architecture</h2>
+                
+                <div class="agent-flow">
+                    <pre>
+┌─────────────────────────────────────────┐
+│          SCOUT AGENT (24/7)             │
+│   - Monitor NewsAPI, Reddit, SEC        │
+│   - Filter for tradeable events         │
+│   - Alert other agents                  │
+└────────────────┬───────────────────────┘
+                 │
+┌────────────────▼───────────────────────┐
+│         ANALYST AGENT (LLM)            │
+│   - Interpret news with GPT-4          │
+│   - Score sentiment and materiality    │
+│   - Generate trade signals             │
+└────────────────┬───────────────────────┘
+                 │
+┌────────────────▼───────────────────────┐
+│        RISK MANAGER AGENT              │
+│   - Check correlation limits           │
+│   - Verify position sizing             │
+│   - Approve/reject trades              │
+└────────────────┬───────────────────────┘
+                 │
+┌────────────────▼───────────────────────┐
+│        EXECUTOR AGENT                  │
+│   - Place orders via Alpaca API        │
+│   - Manage stops and targets           │
+│   - Report fills and P&L               │
+└─────────────────────────────────────────┘
+                    </pre>
+                </div>
+            </section>
+            
+            <section class="implementation-timeline">
+                <h2>📅 6-Week Implementation Plan</h2>
+                
+                <div class="week-block">
+                    <div class="week-header">
+                        <h3>Weeks 1-2: Foundation</h3>
+                    </div>
+                    <p><strong>Goal:</strong> Basic news trading pipeline working in paper trading</p>
+                    <ul>
+                        <li>Day 1-3: Infrastructure setup (Alpaca, APIs, database)</li>
+                        <li>Day 4-7: Build Scout and Analyst agents</li>
+                        <li>Day 8-10: Testing and refinement</li>
+                    </ul>
+                </div>
+                
+                <div class="week-block">
+                    <div class="week-header">
+                        <h3>Weeks 3-4: Enhancement</h3>
+                    </div>
+                    <p><strong>Goal:</strong> Add Gap trading and risk management</p>
+                    <ul>
+                        <li>Day 11-13: Gap trading implementation</li>
+                        <li>Day 14-16: Risk management layer</li>
+                        <li>Day 17-20: Integration testing</li>
+                    </ul>
+                </div>
+                
+                <div class="week-block">
+                    <div class="week-header">
+                        <h3>Weeks 5-6: Live Trading</h3>
+                    </div>
+                    <p><strong>Goal:</strong> Controlled launch with real money</p>
+                    <ul>
+                        <li>Day 21-23: Final validation</li>
+                        <li>Day 24-28: Launch with €1,000</li>
+                        <li>Day 29-30: Scale and optimize</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <section>
+                <h2>💰 Cost Breakdown</h2>
+                
+                <table class="cost-table">
+                    <thead>
+                        <tr>
+                            <th>Service</th>
+                            <th>Provider</th>
+                            <th>Monthly Cost</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Trading Platform</strong></td>
+                            <td>Alpaca</td>
+                            <td>Free</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Market Data</strong></td>
+                            <td>Polygon.io</td>
+                            <td>€50</td>
+                        </tr>
+                        <tr>
+                            <td><strong>News API</strong></td>
+                            <td>NewsAPI</td>
+                            <td>€50</td>
+                        </tr>
+                        <tr>
+                            <td><strong>AI (Primary)</strong></td>
+                            <td>OpenAI GPT-4</td>
+                            <td>€200</td>
+                        </tr>
+                        <tr>
+                            <td><strong>AI (Verification)</strong></td>
+                            <td>Anthropic Claude</td>
+                            <td>€100</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Infrastructure</strong></td>
+                            <td>AWS</td>
+                            <td>€100</td>
+                        </tr>
+                        <tr class="total">
+                            <td colspan="2"><strong>Total Monthly Cost</strong></td>
+                            <td><strong>€500</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+            
+            <section>
+                <h2>📊 Risk Management</h2>
+                
+                <div class="risk-grid">
+                    <div class="risk-item">
+                        <div class="risk-value">2%</div>
+                        <div class="risk-label">Max Risk Per Trade</div>
+                    </div>
+                    <div class="risk-item">
+                        <div class="risk-value">3%</div>
+                        <div class="risk-label">Daily Loss Limit</div>
+                    </div>
+                    <div class="risk-item">
+                        <div class="risk-value">10%</div>
+                        <div class="risk-label">Monthly Drawdown Limit</div>
+                    </div>
+                    <div class="risk-item">
+                        <div class="risk-value">55%</div>
+                        <div class="risk-label">Target Win Rate</div>
+                    </div>
+                    <div class="risk-item">
+                        <div class="risk-value">1.5x</div>
+                        <div class="risk-label">Risk/Reward Ratio</div>
+                    </div>
+                    <div class="risk-item">
+                        <div class="risk-value">25%</div>
+                        <div class="risk-label">Max Position Size</div>
+                    </div>
+                </div>
+            </section>
+            
+            <div class="warning-box">
+                <h3>⚠️ Reality Check</h3>
+                <p><strong>This system will NOT make you rich quickly!</strong></p>
+                <p style="margin-top: 20px;">With €5,000 capital, realistic expectations are:</p>
+                <ul style="text-align: left; max-width: 600px; margin: 20px auto;">
+                    <li>Daily: €50-150 (not €500-1000)</li>
+                    <li>Monthly: €1,000-3,000 (before costs)</li>
+                    <li>Yearly: 50-100% return (if successful)</li>
+                </ul>
+                <p style="margin-top: 20px;"><strong>Remember:</strong> 70% of traders fail. Only trade with money you can afford to lose.</p>
+            </div>
+            
+            <div class="cta-section">
+                <h2>🚀 Ready to Start?</h2>
+                <p style="margin-bottom: 30px;">Begin your AI trading journey with these essential steps</p>
+                <a href="https://alpaca.markets" class="cta-button" target="_blank">Open Alpaca Account</a>
+                <a href="https://platform.openai.com" class="cta-button" target="_blank">Get OpenAI API</a>
+                <a href="https://newsapi.org" class="cta-button" target="_blank">Setup NewsAPI</a>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2025 AI Trading System MVP</p>
+            <p style="margin-top: 10px; opacity: 0.8;">Educational purposes only. Not financial advice.</p>
+        </footer>
+    </div>
+</body>
+</html>

@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}Trade History - MVP News Trading{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-currency-exchange"></i> Trade History
+                    <button class="btn btn-sm btn-primary float-end" onclick="refreshTrades()">
+                        <i class="bi bi-arrow-clockwise"></i> Refresh
+                    </button>
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="trades-table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Ticker</th>
+                                <th>Side</th>
+                                <th>Quantity</th>
+                                <th>Entry Price</th>
+                                <th>Exit Price</th>
+                                <th>P&L</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="trades-tbody">
+                            <tr>
+                                <td colspan="9" class="text-center text-muted">Loading trades...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Trade Details Modal -->
+<div class="modal fade" id="tradeDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Trade Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="trade-details-body">
+                <!-- Trade details will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function loadTrades() {
+        fetch('/api/recent-trades')
+            .then(response => response.json())
+            .then(trades => {
+                const tbody = document.getElementById('trades-tbody');
+                
+                if (trades.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">No trades yet</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = trades.map(trade => {
+                    const pnl = trade.exit_price ? (trade.exit_price - trade.entry_price) * trade.quantity : 0;
+                    const pnlClass = pnl >= 0 ? 'profit' : 'loss';
+                    const statusBadge = getStatusBadge(trade.status);
+                    
+                    return `
+                        <tr>
+                            <td>${new Date(trade.opened_at).toLocaleString()}</td>
+                            <td><strong>${trade.ticker}</strong></td>
+                            <td>${trade.side}</td>
+                            <td>${trade.quantity}</td>
+                            <td>$${trade.entry_price?.toFixed(2) || '-'}</td>
+                            <td>$${trade.exit_price?.toFixed(2) || '-'}</td>
+                            <td class="${pnlClass}">$${pnl.toFixed(2)}</td>
+                            <td>${statusBadge}</td>
+                            <td>
+                                <button class="btn btn-sm btn-info" onclick="viewTradeDetails(${trade.id})">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            })
+            .catch(error => {
+                console.error('Error loading trades:', error);
+                document.getElementById('trades-tbody').innerHTML = 
+                    '<tr><td colspan="9" class="text-center text-danger">Error loading trades</td></tr>';
+            });
+    }
+    
+    function getStatusBadge(status) {
+        const badges = {
+            'open': '<span class="badge bg-primary">Open</span>',
+            'closed': '<span class="badge bg-success">Closed</span>',
+            'pending': '<span class="badge bg-warning">Pending</span>',
+            'cancelled': '<span class="badge bg-secondary">Cancelled</span>',
+            'failed': '<span class="badge bg-danger">Failed</span>'
+        };
+        return badges[status] || `<span class="badge bg-secondary">${status}</span>`;
+    }
+    
+    function viewTradeDetails(tradeId) {
+        // In a real app, fetch trade details from API
+        const modal = new bootstrap.Modal(document.getElementById('tradeDetailsModal'));
+        document.getElementById('trade-details-body').innerHTML = `
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Trade Information</h6>
+                    <table class="table table-sm">
+                        <tr><td>Trade ID:</td><td>${tradeId}</td></tr>
+                        <tr><td>Signal Source:</td><td>AI Analysis</td></tr>
+                        <tr><td>Risk Score:</td><td>Low</td></tr>
+                        <tr><td>Confidence:</td><td>85%</td></tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h6>Execution Details</h6>
+                    <table class="table table-sm">
+                        <tr><td>Order Type:</td><td>Market</td></tr>
+                        <tr><td>Stop Loss:</td><td>$145.00</td></tr>
+                        <tr><td>Take Profit:</td><td>$155.00</td></tr>
+                        <tr><td>Slippage:</td><td>$0.05</td></tr>
+                    </table>
+                </div>
+            </div>
+        `;
+        modal.show();
+    }
+    
+    function refreshTrades() {
+        const tbody = document.getElementById('trades-tbody');
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center"><span class="spinner-border spinner-border-sm"></span> Refreshing...</td></tr>';
+        setTimeout(loadTrades, 500);
+    }
+    
+    // Load trades on page load
+    loadTrades();
+    
+    // Auto-refresh every 30 seconds
+    setInterval(loadTrades, 30000);
+    
+    // Listen for trade updates via WebSocket
+    socket.on('trades_update', function(trades) {
+        loadTrades();
+    });
+</script>
+{% endblock %}

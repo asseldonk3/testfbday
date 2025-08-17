@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block title %}Analyst Agent - MVP News Trading{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+            <li class="breadcrumb-item active">Analyst Agent</li>
+        </ol>
+    </nav>
+
+    <h2 class="mb-4">📊 Analyst Agent (Step 3)</h2>
+    
+    <div class="row">
+        <!-- Signal Generation Logic -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Signal Generation Logic</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tr><td><strong>AI Model:</strong></td><td>GPT-4 + Gemini Pro</td></tr>
+                        <tr><td><strong>Confidence Threshold:</strong></td><td>70%</td></tr>
+                        <tr><td><strong>Signal Types:</strong></td><td>BUY, SELL, HOLD</td></tr>
+                        <tr><td><strong>Analysis Method:</strong></td><td>News + Technical</td></tr>
+                    </table>
+                    
+                    <h6 class="mt-3">Scoring Weights</h6>
+                    <div class="progress mb-2">
+                        <div class="progress-bar" style="width: 30%">Catalyst Proximity (30%)</div>
+                    </div>
+                    <div class="progress mb-2">
+                        <div class="progress-bar bg-success" style="width: 20%">Volume Trend (20%)</div>
+                    </div>
+                    <div class="progress mb-2">
+                        <div class="progress-bar bg-info" style="width: 20%">Gap History (20%)</div>
+                    </div>
+                    <div class="progress mb-2">
+                        <div class="progress-bar bg-warning" style="width: 15%">Options Activity (15%)</div>
+                    </div>
+                    <div class="progress mb-2">
+                        <div class="progress-bar bg-danger" style="width: 15%">Liquidity (15%)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Signals -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Active Signals</h5>
+                </div>
+                <div class="card-body">
+                    <div id="active-signals">
+                        <div class="signal-item mb-3 p-2 border rounded">
+                            <div class="d-flex justify-content-between">
+                                <h6>ASML.AS</h6>
+                                <span class="badge bg-success">BUY</span>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">Confidence: <strong>78%</strong></div>
+                                <div class="col-6">Status: <span class="badge bg-warning">Pending</span></div>
+                            </div>
+                            <small>Reason: Earnings beat + positive guidance</small>
+                        </div>
+                    </div>
+                    
+                    <h6 class="mt-3">Today's Stats</h6>
+                    <ul>
+                        <li>Signals generated: <strong>6</strong></li>
+                        <li>Average confidence: <strong>75%</strong></li>
+                        <li>Approved by risk: <strong>3</strong></li>
+                        <li>Rejected: <strong>3</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Prompt for Signal Generation -->
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">Signal Generation Prompt</h5>
+        </div>
+        <div class="card-body">
+            <pre class="bg-light p-3"><code>You are an expert trading analyst generating signals from news events.
+
+NEWS EVENT:
+{news_headline}
+{news_summary}
+Sentiment: {sentiment}
+Materiality: {materiality}/10
+
+CURRENT MARKET DATA:
+Stock: {ticker}
+Current Price: {price}
+Volume: {volume} (avg: {avg_volume})
+52-week range: {low_52w} - {high_52w}
+Pre-market move: {premarket_change}%
+
+TASK: Generate a trading signal based on this information.
+
+ANALYSIS REQUIRED:
+1. News Impact Assessment
+   - Is this news already priced in?
+   - Expected price movement (%)
+   - Time horizon for impact
+
+2. Technical Context
+   - Support/resistance levels
+   - Current trend (up/down/sideways)
+   - Volume confirmation
+
+3. Trading Signal
+   - Direction: BUY/SELL/HOLD
+   - Confidence: 0-100%
+   - Entry price target
+   - Stop loss level (-2% max)
+   - Take profit target (2:1 risk/reward minimum)
+   - Time frame: INTRADAY only
+
+RULES:
+- Only generate BUY/SELL if confidence > 70%
+- Consider liquidity (min €10M daily volume)
+- Account for spread and slippage
+- No signals 15 min after open or before close
+
+OUTPUT FORMAT:
+{
+  "signal": "BUY/SELL/HOLD",
+  "confidence": 75,
+  "entry": 450.50,
+  "stop_loss": 441.50,
+  "take_profit": 468.50,
+  "reasoning": "Brief explanation",
+  "risk_factors": ["factor1", "factor2"]
+}</code></pre>
+        </div>
+    </div>
+
+    <!-- Recent Signal Output -->
+    <div class="card">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">Latest Signal Generated</h5>
+        </div>
+        <div class="card-body">
+            <pre class="bg-light p-3"><code>{
+  "timestamp": "2025-01-16T10:35:00Z",
+  "ticker": "ASML.AS",
+  "news_trigger": "Q4 earnings beat by 15%",
+  "signal": "BUY",
+  "confidence": 78,
+  "entry": 745.50,
+  "stop_loss": 730.50,
+  "take_profit": 775.50,
+  "position_size": 134,  // shares
+  "risk_amount": 2010,   // € risk
+  "potential_profit": 4020,
+  "reasoning": "Strong earnings beat with raised guidance. Stock gapped up 2% but has room to run based on historical post-earnings moves. Volume confirming breakout.",
+  "risk_factors": [
+    "Overall market weakness could limit upside",
+    "Already up 15% this month",
+    "Options showing elevated implied volatility"
+  ],
+  "technical_levels": {
+    "support": 735.00,
+    "resistance": 780.00,
+    "vwap": 742.30,
+    "rsi": 58
+  },
+  "status": "pending_risk_approval"
+}</code></pre>
+        </div>
+    </div>
+
+    <!-- Signal History -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="mb-0">Recent Signal History</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Ticker</th>
+                        <th>Signal</th>
+                        <th>Confidence</th>
+                        <th>Status</th>
+                        <th>Result</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>10:35</td>
+                        <td>ASML.AS</td>
+                        <td><span class="badge bg-success">BUY</span></td>
+                        <td>78%</td>
+                        <td><span class="badge bg-warning">Pending</span></td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>09:15</td>
+                        <td>SAP.DE</td>
+                        <td><span class="badge bg-danger">SELL</span></td>
+                        <td>72%</td>
+                        <td><span class="badge bg-success">Executed</span></td>
+                        <td class="text-success">+€1,250</td>
+                    </tr>
+                    <tr>
+                        <td>Yesterday</td>
+                        <td>MC.PA</td>
+                        <td><span class="badge bg-success">BUY</span></td>
+                        <td>81%</td>
+                        <td><span class="badge bg-success">Closed</span></td>
+                        <td class="text-success">+€2,100</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

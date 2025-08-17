@@ -1,0 +1,36 @@
+# Core Framework
+fastapi==0.109.0
+uvicorn[standard]==0.25.0
+python-dotenv==1.0.0
+
+# Database
+sqlalchemy==2.0.23
+psycopg2-binary==2.9.9
+alembic==1.13.1
+
+# AI/LLM Services
+google-generativeai==0.8.3
+openai==1.6.0
+
+# Trading & Market Data
+alpaca-py==0.13.3
+requests==2.31.0
+httpx==0.25.2
+
+# Scheduling & Async
+schedule==1.2.0
+asyncio==3.4.3
+
+# Data Processing
+pandas==2.1.4
+numpy==1.24.3
+pydantic==2.5.3
+pydantic-settings==2.1.0
+python-dateutil==2.8.2
+
+# Notifications
+python-telegram-bot==20.7
+
+# Utilities
+loguru==0.7.2
+python-json-logger==2.0.7
