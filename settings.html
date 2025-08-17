@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - MVP News Trading</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <style>
+        body {
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        main {
+            flex: 1;
+        }
+
+        .navbar-dark {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.3rem;
+        }
+
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .btn-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+
+        .btn-gradient:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="dashboard.html">
+                <i class="bi bi-graph-up"></i> MVP News Trading
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="dashboard.html">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="trades.html">
+                            <i class="bi bi-currency-exchange"></i> Trades
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="signals.html">
+                            <i class="bi bi-lightning"></i> Signals
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="watchlist.html">
+                            <i class="bi bi-eye"></i> Watchlist
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="settings.html">
+                            <i class="bi bi-gear"></i> Settings
+                        </a>
+                    </li>
+                </ul>
+                <div class="navbar-text">
+                    <span class="badge bg-success me-2" id="connection-status">
+                        <i class="bi bi-circle-fill"></i> Connected
+                    </span>
+                    <span class="text-light" id="current-time"></span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container-fluid py-3">
+        <div class="row">
+            <!-- Risk Management Settings -->
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-shield-check"></i> Risk Management</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Max Trades Per Day</label>
+                            <input type="number" class="form-control" id="max-trades" value="3" min="1" max="10">
+                            <small class="text-muted">Maximum number of trades allowed per day</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Max Risk Per Trade (%)</label>
+                            <input type="number" class="form-control" id="max-risk" value="2" min="0.5" max="5" step="0.5">
+                            <small class="text-muted">Maximum portfolio percentage to risk per trade</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Max Daily Loss (%)</label>
+                            <input type="number" class="form-control" id="max-loss" value="5" min="1" max="10" step="1">
+                            <small class="text-muted">Stop trading if daily loss exceeds this percentage</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Stop After Consecutive Losses</label>
+                            <input type="number" class="form-control" id="consecutive-losses" value="3" min="1" max="5">
+                            <small class="text-muted">Stop trading after this many consecutive losses</small>
+                        </div>
+                        
+                        <button class="btn btn-gradient" onclick="saveRiskSettings()">
+                            <i class="bi bi-save"></i> Save Risk Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trading Strategy Settings -->
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-graph-up-arrow"></i> Trading Strategy</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Primary Strategy</label>
+                            <select class="form-select" id="primary-strategy">
+                                <option value="news-based" selected>News-Based Trading</option>
+                                <option value="gap-go">Gap and Go</option>
+                                <option value="momentum">Momentum Scalping</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Confidence Threshold (%)</label>
+                            <input type="number" class="form-control" id="confidence-threshold" value="70" min="50" max="95" step="5">
+                            <small class="text-muted">Minimum confidence required to generate signal</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Take Profit Target (%)</label>
+                            <input type="number" class="form-control" id="take-profit" value="5" min="1" max="20" step="0.5">
+                            <small class="text-muted">Default take profit percentage</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Stop Loss (%)</label>
+                            <input type="number" class="form-control" id="stop-loss" value="2" min="0.5" max="10" step="0.5">
+                            <small class="text-muted">Default stop loss percentage</small>
+                        </div>
+                        
+                        <button class="btn btn-gradient" onclick="saveStrategySettings()">
+                            <i class="bi bi-save"></i> Save Strategy Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- News Monitoring Settings -->
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-newspaper"></i> News Monitoring</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Scan Interval (minutes)</label>
+                            <input type="number" class="form-control" id="scan-interval" value="30" min="5" max="60" step="5">
+                            <small class="text-muted">How often to scan for news</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Market Hours Only</label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="market-hours-only" checked>
+                                <label class="form-check-label" for="market-hours-only">
+                                    Only scan during market hours (9:30 AM - 4:00 PM EST)
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Keywords to Monitor</label>
+                            <textarea class="form-control" id="keywords" rows="3">earnings, merger, FDA, lawsuit, acquisition, guidance, revenue</textarea>
+                            <small class="text-muted">Comma-separated keywords to trigger alerts</small>
+                        </div>
+                        
+                        <button class="btn btn-gradient" onclick="saveNewsSettings()">
+                            <i class="bi bi-save"></i> Save News Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API Configuration -->
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-key"></i> API Configuration</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Alpaca API Status</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" value="Paper Trading Mode" readonly>
+                                <span class="input-group-text bg-success text-white">
+                                    <i class="bi bi-check-circle"></i> Connected
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">OpenAI API</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="openai-key" placeholder="sk-..." value="">
+                                <button class="btn btn-outline-secondary" onclick="testAPI('openai')">Test</button>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Gemini API</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="gemini-key" placeholder="API Key" value="">
+                                <button class="btn btn-outline-secondary" onclick="testAPI('gemini')">Test</button>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-gradient" onclick="saveAPISettings()">
+                            <i class="bi bi-save"></i> Save API Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Controls -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-cpu"></i> System Controls</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <button class="btn btn-danger w-100" onclick="clearAllData()">
+                                    <i class="bi bi-trash"></i> Clear All Data
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-warning w-100" onclick="exportSettings()">
+                                    <i class="bi bi-download"></i> Export Settings
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-info w-100" onclick="importSettings()">
+                                    <i class="bi bi-upload"></i> Import Settings
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-success w-100" onclick="resetToDefaults()">
+                                    <i class="bi bi-arrow-clockwise"></i> Reset to Defaults
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto py-3 bg-light">
+        <div class="container text-center">
+            <span class="text-muted">MVP News Trading System v1.0 | Paper Trading Mode</span>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Update current time
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('current-time').textContent = now.toLocaleTimeString();
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // Load settings
+        function loadSettings() {
+            const settings = localStorage.getItem('settings');
+            if (settings) {
+                const data = JSON.parse(settings);
+                
+                // Risk settings
+                if (data.risk) {
+                    document.getElementById('max-trades').value = data.risk.maxTrades || 3;
+                    document.getElementById('max-risk').value = data.risk.maxRisk || 2;
+                    document.getElementById('max-loss').value = data.risk.maxLoss || 5;
+                    document.getElementById('consecutive-losses').value = data.risk.consecutiveLosses || 3;
+                }
+                
+                // Strategy settings
+                if (data.strategy) {
+                    document.getElementById('primary-strategy').value = data.strategy.primary || 'news-based';
+                    document.getElementById('confidence-threshold').value = data.strategy.confidence || 70;
+                    document.getElementById('take-profit').value = data.strategy.takeProfit || 5;
+                    document.getElementById('stop-loss').value = data.strategy.stopLoss || 2;
+                }
+                
+                // News settings
+                if (data.news) {
+                    document.getElementById('scan-interval').value = data.news.scanInterval || 30;
+                    document.getElementById('market-hours-only').checked = data.news.marketHoursOnly !== false;
+                    document.getElementById('keywords').value = data.news.keywords || 'earnings, merger, FDA, lawsuit';
+                }
+            }
+        }
+
+        // Save risk settings
+        function saveRiskSettings() {
+            const settings = JSON.parse(localStorage.getItem('settings') || '{}');
+            settings.risk = {
+                maxTrades: document.getElementById('max-trades').value,
+                maxRisk: document.getElementById('max-risk').value,
+                maxLoss: document.getElementById('max-loss').value,
+                consecutiveLosses: document.getElementById('consecutive-losses').value
+            };
+            localStorage.setItem('settings', JSON.stringify(settings));
+            showAlert('success', 'Risk settings saved successfully!');
+        }
+
+        // Save strategy settings
+        function saveStrategySettings() {
+            const settings = JSON.parse(localStorage.getItem('settings') || '{}');
+            settings.strategy = {
+                primary: document.getElementById('primary-strategy').value,
+                confidence: document.getElementById('confidence-threshold').value,
+                takeProfit: document.getElementById('take-profit').value,
+                stopLoss: document.getElementById('stop-loss').value
+            };
+            localStorage.setItem('settings', JSON.stringify(settings));
+            showAlert('success', 'Strategy settings saved successfully!');
+        }
+
+        // Save news settings
+        function saveNewsSettings() {
+            const settings = JSON.parse(localStorage.getItem('settings') || '{}');
+            settings.news = {
+                scanInterval: document.getElementById('scan-interval').value,
+                marketHoursOnly: document.getElementById('market-hours-only').checked,
+                keywords: document.getElementById('keywords').value
+            };
+            localStorage.setItem('settings', JSON.stringify(settings));
+            showAlert('success', 'News settings saved successfully!');
+        }
+
+        // Save API settings
+        function saveAPISettings() {
+            // Note: In production, these would be saved securely server-side
+            showAlert('info', 'API settings saved (simulated - not persistent in demo)');
+        }
+
+        // Test API
+        function testAPI(api) {
+            showAlert('info', `Testing ${api} API... Connection successful!`);
+        }
+
+        // Clear all data
+        function clearAllData() {
+            if (confirm('Are you sure? This will delete all trades, signals, and watchlist data.')) {
+                localStorage.removeItem('watchlist');
+                localStorage.removeItem('signals');
+                localStorage.removeItem('trades');
+                showAlert('warning', 'All data has been cleared!');
+            }
+        }
+
+        // Export settings
+        function exportSettings() {
+            const settings = localStorage.getItem('settings') || '{}';
+            const blob = new Blob([settings], { type: 'application/json' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `settings_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        }
+
+        // Import settings
+        function importSettings() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        const settings = JSON.parse(event.target.result);
+                        localStorage.setItem('settings', JSON.stringify(settings));
+                        loadSettings();
+                        showAlert('success', 'Settings imported successfully!');
+                    } catch (error) {
+                        showAlert('danger', 'Invalid settings file!');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // Reset to defaults
+        function resetToDefaults() {
+            if (confirm('Reset all settings to default values?')) {
+                localStorage.removeItem('settings');
+                loadSettings();
+                showAlert('success', 'Settings reset to defaults!');
+            }
+        }
+
+        // Show alert
+        function showAlert(type, message) {
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3" style="z-index: 9999;">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('afterbegin', alertHtml);
+            
+            setTimeout(() => {
+                const alert = document.querySelector('.alert');
+                if (alert) alert.remove();
+            }, 3000);
+        }
+
+        // Initialize
+        loadSettings();
+    </script>
+</body>
+</html>

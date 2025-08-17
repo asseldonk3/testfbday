@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watchlist - MVP News Trading</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <style>
+        body {
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        main {
+            flex: 1;
+        }
+
+        .navbar-dark {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.3rem;
+        }
+
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+        }
+
+        .stock-card {
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .stock-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .score-badge {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .high-score {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 10px;
+        }
+
+        .medium-score {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 10px;
+        }
+
+        .low-score {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 10px;
+        }
+
+        .btn-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+
+        .btn-gradient:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="dashboard.html">
+                <i class="bi bi-graph-up"></i> MVP News Trading
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="dashboard.html">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="trades.html">
+                            <i class="bi bi-currency-exchange"></i> Trades
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="signals.html">
+                            <i class="bi bi-lightning"></i> Signals
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="watchlist.html">
+                            <i class="bi bi-eye"></i> Watchlist
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="settings.html">
+                            <i class="bi bi-gear"></i> Settings
+                        </a>
+                    </li>
+                </ul>
+                <div class="navbar-text">
+                    <span class="badge bg-success me-2" id="connection-status">
+                        <i class="bi bi-circle-fill"></i> Connected
+                    </span>
+                    <span class="text-light" id="current-time"></span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container-fluid py-3">
+        <!-- Header Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="mb-3">📋 Weekly Watchlist Management</h4>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h5>Current Week</h5>
+                                    <h2 id="current-week">Week 51</h2>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h5>Total Stocks</h5>
+                                    <h2 id="stock-count">0</h2>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h5>Last Update</h5>
+                                    <h2 id="last-update">Never</h2>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-gradient btn-lg w-100" onclick="selectWeeklyStocks()">
+                                    <i class="bi bi-arrow-clockwise"></i> Run Weekly Selection
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading-state" class="text-center" style="display: none;">
+            <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;"></div>
+            <h3>AI is selecting the best stocks for this week...</h3>
+            <p class="text-muted">Analyzing 40+ stocks based on liquidity, volatility, and upcoming catalysts</p>
+        </div>
+
+        <!-- Watchlist Grid -->
+        <div id="watchlist-container">
+            <div class="row g-3" id="watchlist-grid">
+                <!-- Stocks will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="text-center py-5">
+            <i class="bi bi-inbox" style="font-size: 4rem; color: #dee2e6;"></i>
+            <h3 class="mt-3">No stocks selected yet</h3>
+            <p class="text-muted">Click "Run Weekly Selection" to let AI select the best stocks for this week</p>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto py-3 bg-light">
+        <div class="container text-center">
+            <span class="text-muted">MVP News Trading System v1.0 | Paper Trading Mode</span>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Update current time
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('current-time').textContent = now.toLocaleTimeString();
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // Get current week number
+        function getCurrentWeek() {
+            const now = new Date();
+            const start = new Date(now.getFullYear(), 0, 1);
+            const diff = now - start;
+            const oneWeek = 1000 * 60 * 60 * 24 * 7;
+            return Math.ceil(diff / oneWeek);
+        }
+
+        // Load watchlist
+        function loadWatchlist() {
+            const watchlist = localStorage.getItem('watchlist');
+            const watchlistWeek = localStorage.getItem('watchlist_week');
+            
+            if (watchlist) {
+                const stocks = JSON.parse(watchlist);
+                displayWatchlist(stocks);
+                document.getElementById('stock-count').textContent = stocks.length;
+                document.getElementById('current-week').textContent = `Week ${watchlistWeek || getCurrentWeek()}`;
+                document.getElementById('last-update').textContent = new Date().toLocaleDateString();
+            }
+        }
+
+        // Display watchlist
+        function displayWatchlist(stocks) {
+            const container = document.getElementById('watchlist-grid');
+            const emptyState = document.getElementById('empty-state');
+            
+            if (!stocks || stocks.length === 0) {
+                container.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            
+            container.innerHTML = stocks.map((stock, index) => `
+                <div class="col-md-3 col-lg-2">
+                    <div class="card stock-card">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">${stock.symbol}</h5>
+                            <div class="mb-3">
+                                <span class="score-badge ${stock.score >= 85 ? 'high-score' : stock.score >= 75 ? 'medium-score' : 'low-score'}">
+                                    ${stock.score}
+                                </span>
+                            </div>
+                            <p class="small text-muted">${stock.reason}</p>
+                            <div class="mt-2">
+                                <small class="text-muted">Rank #${index + 1}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Select weekly stocks
+        async function selectWeeklyStocks() {
+            const loadingState = document.getElementById('loading-state');
+            const emptyState = document.getElementById('empty-state');
+            const container = document.getElementById('watchlist-container');
+            
+            // Show loading state
+            loadingState.style.display = 'block';
+            emptyState.style.display = 'none';
+            container.style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/weekly_candidates_supabase', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const text = await response.text();
+                const data = JSON.parse(text);
+                
+                if (data.success) {
+                    // Save to localStorage
+                    localStorage.setItem('watchlist', JSON.stringify(data.candidates));
+                    localStorage.setItem('watchlist_week', data.week);
+                    
+                    // Update UI
+                    displayWatchlist(data.candidates);
+                    document.getElementById('stock-count').textContent = data.candidates.length;
+                    document.getElementById('current-week').textContent = `Week ${data.week}`;
+                    document.getElementById('last-update').textContent = new Date().toLocaleDateString();
+                    
+                    // Show success message
+                    showAlert('success', `Successfully selected ${data.candidates.length} stocks for week ${data.week}!`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('danger', `Failed to select stocks: ${error.message}`);
+            } finally {
+                loadingState.style.display = 'none';
+                container.style.display = 'block';
+            }
+        }
+
+        // Show alert
+        function showAlert(type, message) {
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3" style="z-index: 9999;">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('afterbegin', alertHtml);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                const alert = document.querySelector('.alert');
+                if (alert) alert.remove();
+            }, 5000);
+        }
+
+        // Initialize
+        document.getElementById('current-week').textContent = `Week ${getCurrentWeek()}`;
+        loadWatchlist();
+    </script>
+</body>
+</html>
