@@ -86,7 +86,7 @@
         async function selectCandidates() {
             showLoading(true);
             try {
-                const response = await fetch('/api/weekly_candidates', {
+                const response = await fetch('/api/weekly_candidates_supabase', {
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' }
                 });
