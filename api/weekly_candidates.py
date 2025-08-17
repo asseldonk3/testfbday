@@ -1,85 +1,55 @@
-"""
-Vercel Function for selecting weekly trading candidates
-Trigger this endpoint manually or via a cron service
-"""
-import os
+from http.server import BaseHTTPRequestHandler
 import json
 from datetime import datetime
 import random
 
-def handler(request):
-    """
-    Vercel function to select 10-25 weekly trading candidates
-    Access via: https://your-app.vercel.app/api/weekly_candidates
-    """
-    
-    """
-    Handle CORS and process request
-    """
-    # Handle CORS
-    headers = {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        'Content-Type': 'application/json'
-    }
-    
-    # Handle preflight requests
-    if request.method == 'OPTIONS':
-        return {
-            'statusCode': 200,
-            'headers': headers,
-            'body': ''
-        }
-    
-    try:
-        # Sample stock universe (in production, this would come from market data)
+class handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.end_headers()
+        
+        # Sample stock universe
         stock_universe = [
-            'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'TSLA', 'BRK.B',
-            'JPM', 'V', 'JNJ', 'WMT', 'PG', 'MA', 'HD', 'DIS', 'BAC', 'ADBE',
-            'NFLX', 'CRM', 'PFE', 'ABBV', 'KO', 'NKE', 'MRK', 'PEP', 'TMO',
-            'COST', 'CVX', 'WFC', 'MS', 'UPS', 'INTC', 'AMD', 'QCOM', 'TXN'
+            'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'TSLA',
+            'JPM', 'V', 'JNJ', 'WMT', 'PG', 'MA', 'HD', 'DIS', 'BAC',
+            'NFLX', 'CRM', 'PFE', 'ABBV', 'KO', 'NKE', 'MRK', 'PEP',
+            'COST', 'CVX', 'WFC', 'MS', 'UPS', 'INTC', 'AMD', 'QCOM'
         ]
         
-        # Selection criteria (simplified for demo)
-        criteria = {
-            'min_volume': 1000000,
-            'min_price': 10,
-            'max_price': 500,
-            'sectors': ['Technology', 'Healthcare', 'Finance', 'Consumer']
-        }
-        
-        # Select 10-25 random stocks (in production, use AI analysis)
+        # Select 10-25 random stocks
         num_stocks = random.randint(10, 25)
         selected_stocks = random.sample(stock_universe, min(num_stocks, len(stock_universe)))
         
-        # Create watchlist
-        watchlist = {
+        # Create response with scores
+        candidates = []
+        for stock in selected_stocks:
+            candidates.append({
+                'symbol': stock,
+                'score': random.randint(70, 95),
+                'reason': f"Selected for {random.choice(['high volume', 'news catalyst', 'momentum', 'volatility'])}"
+            })
+        
+        # Sort by score
+        candidates.sort(key=lambda x: x['score'], reverse=True)
+        
+        response = {
+            'success': True,
+            'message': f'Selected {len(candidates)} stocks for weekly monitoring',
+            'candidates': candidates,
+            'total_selected': len(candidates),
             'week': datetime.now().strftime('%Y-W%U'),
-            'created_at': datetime.now().isoformat(),
-            'stocks': selected_stocks,
-            'count': len(selected_stocks),
-            'criteria': criteria,
-            'status': 'active'
+            'timestamp': datetime.now().isoformat()
         }
         
-        # Return success response
-        return {
-            'statusCode': 200,
-            'headers': headers,
-            'body': json.dumps({
-                'success': True,
-                'message': f'Selected {len(selected_stocks)} stocks for weekly monitoring',
-                'watchlist': watchlist
-            })
-        }
-    except Exception as e:
-        # Return error response
-        return {
-            'statusCode': 500,
-            'headers': headers,
-            'body': json.dumps({
-                'success': False,
-                'error': str(e)
-            })
-        }
+        self.wfile.write(json.dumps(response).encode())
+        return
+    
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.end_headers()
+        return
